@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BANG! Házi Ranglista</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0c0905;}
+    ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0c0905} ::-webkit-scrollbar-thumb{background:#4a2e10;border-radius:2px}
+    input,select,button,textarea{font-family:'Playfair Display',Georgia,serif}
+    select option{background:#1a1008;color:#c8a060}
+    .btn{transition:all .15s;cursor:pointer;border:none}
+    .btn:hover:not(:disabled){filter:brightness(1.2);transform:translateY(-1px)}
+    .btn:active:not(:disabled){transform:translateY(0)}
+    .btn:disabled{opacity:.35;cursor:not-allowed}
+    .hov:hover{background:rgba(232,184,75,.06)!important}
+    @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes sr{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .fu{animation:fu .25s ease both}
+    .sr{animation:sr .22s ease both}
+    .nb{position:relative}
+    .nb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#e8b84b;transform:scaleX(0);transition:transform .2s}
+    .nb.on::after{transform:scaleX(1)}
+    .spin{display:inline-block;animation:spin .8s linear infinite}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+// ── SZOBA RENDSZER ────────────────────────────────────────────────────────────
+// Minden adat JSONBin.io-n tárolódik
+// apiKey = JSONBin master key (localStorage-ban)
+// roomId = JSONBin bin ID = szoba kulcs (localStorage-ban)
+
+const LS_KEY    = "bang_apikey";
+const LS_ROOM   = "bang_roomid";
+const LS_RNAME  = "bang_roomname";
+
+const jbHdrs = key => ({ "Content-Type":"application/json", "X-Master-Key":key });
+
+async function jbRead(binId, apiKey) {
+  const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+    headers:{"X-Master-Key":apiKey}
+  });
+  if(!r.ok) throw new Error(r.status);
+  return (await r.json()).record;
+}
+
+async function jbWrite(binId, apiKey, data) {
+  const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+    method:"PUT", headers:jbHdrs(apiKey), body:JSON.stringify(data)
+  });
+  if(!r.ok) throw new Error(r.status);
+}
+
+async function jbCreate(apiKey, roomName) {
+  const r = await fetch("https://api.jsonbin.io/v3/b", {
+    method:"POST",
+    headers:{...jbHdrs(apiKey),"X-Bin-Name":`BANG-${roomName}`,"X-Bin-Private":"false"},
+    body:JSON.stringify({players:[],games:[]})
+  });
+  if(!r.ok) throw new Error(r.status);
+  return (await r.json()).metadata.id;
+}
+
+// ── SETUP KÉPERNYŐ ────────────────────────────────────────────────────────────
+function SetupScreen({onDone}) {
+  const [key, setKey] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  const verify = () => {
+    const k = key.trim();
+    if(!k){setErr("Add meg az API kulcsot!"); return;}
+    // Nem validálunk előre — a kulcs helyességét szoba létrehozáskor ellenőrzi
+    localStorage.setItem(LS_KEY, k);
+    onDone(k);
+  };
+
+  return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",
+      background:"radial-gradient(ellipse at 50% 0%,#1a0e04 0%,#0c0905 100%)",padding:20}}>
+      <div style={{maxWidth:440,width:"100%"}}>
+        <div style={{textAlign:"center",marginBottom:28}}>
+          <div style={{color:"#3a2410",fontSize:11,letterSpacing:7,marginBottom:4}}>— ✦ ✦ ✦ —</div>
+          <h1 style={{fontFamily:"'Rye',serif",fontSize:72,color:"#e8b84b",letterSpacing:8,
+            textShadow:"0 0 50px #e8b84b2a,0 2px 0 #000",lineHeight:1}}>BANG!</h1>
+          <p style={{color:"#5a3a18",fontSize:12,letterSpacing:6,marginTop:4}}>HÁZI RANGLISTA</p>
+        </div>
+
+        <div style={{padding:24,border:"1px solid #3a2010",borderRadius:10,background:"#100c06"}}>
+          <div style={{color:"#c89030",fontWeight:700,fontSize:16,marginBottom:6}}>🔑 JSONBin API kulcs</div>
+          <div style={{color:"#5a3a18",fontSize:13,lineHeight:1.8,marginBottom:16}}>
+            Az adatok biztonságos tárolásához szükséges egy ingyenes JSONBin fiók.<br/>
+            <a href="https://jsonbin.io" target="_blank"
+              style={{color:"#e8b84b",textDecoration:"none"}}>jsonbin.io</a> → Regisztrálj → API Keys → Master Key
+          </div>
+          <input
+            type="password"
+            value={key}
+            onChange={e=>setKey(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&verify()}
+            placeholder="$2a$10$..."
+            style={{width:"100%",background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
+              borderRadius:5,padding:"10px 14px",fontSize:15,marginBottom:10,outline:"none"}}
+          />
+          {err&&<div style={{color:"#f08080",fontSize:13,marginBottom:10}}>⚠️ {err}</div>}
+          <button className="btn" onClick={verify}
+            style={{width:"100%",padding:"12px",background:"linear-gradient(180deg,#3a2208,#231504)",
+              color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,
+              fontFamily:"'Rye',serif",fontSize:16,letterSpacing:2}}>
+            Tovább →
+          </button>
+          <div style={{marginTop:12,fontSize:11,color:"#3a2010",textAlign:"center"}}>
+            A kulcs csak a te böngésződben tárolódik, sehova sem kerül feltöltésre.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── SZOBA VÁLASZTÓ ────────────────────────────────────────────────────────────
+function RoomScreen({apiKey, onJoin}) {
+  const [mode,      setMode]      = useState(""); // "create"|"join"
+  const [roomName,  setRoomName]  = useState("");
+  const [roomKey,   setRoomKey]   = useState("");
+  const [loading,   setLoading]   = useState(false);
+  const [err,       setErr]       = useState("");
+  const [created,   setCreated]   = useState(null); // {id, name}
+
+  const createRoom = async () => {
+    if(!roomName.trim()){setErr("Add meg a szoba nevét!"); return;}
+    setLoading(true); setErr("");
+    try {
+      const id = await jbCreate(apiKey, roomName.trim());
+      setCreated({id, name:roomName.trim()});
+    } catch(e) {
+      setErr("Hiba a szoba létrehozásakor: " + e.message);
+    }
+    setLoading(false);
+  };
+
+  const joinRoom = async () => {
+    const key = roomKey.trim();
+    if(!key){setErr("Add meg a szoba kulcsát!"); return;}
+    setLoading(true); setErr("");
+    try {
+      const d = await jbRead(key, apiKey);
+      if(!d||!Array.isArray(d.players)) throw new Error("Érvénytelen szoba");
+      localStorage.setItem(LS_ROOM, key);
+      localStorage.setItem(LS_RNAME, "Szoba");
+      onJoin(key, "Szoba", d.players, d.games);
+    } catch(e) {
+      setErr("Nem található ez a szoba. Ellenőrizd a kulcsot!");
+    }
+    setLoading(false);
+  };
+
+  const enterCreated = () => {
+    localStorage.setItem(LS_ROOM, created.id);
+    localStorage.setItem(LS_RNAME, created.name);
+    onJoin(created.id, created.name, [], []);
+  };
+
+  const resetKey = () => {
+    localStorage.removeItem(LS_KEY);
+    window.location.reload();
+  };
+
+  return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",
+      background:"radial-gradient(ellipse at 50% 0%,#1a0e04 0%,#0c0905 100%)",padding:20}}>
+      <div style={{maxWidth:440,width:"100%"}}>
+        <div style={{textAlign:"center",marginBottom:24}}>
+          <h1 style={{fontFamily:"'Rye',serif",fontSize:56,color:"#e8b84b",letterSpacing:6,
+            textShadow:"0 0 50px #e8b84b2a",lineHeight:1}}>BANG!</h1>
+          <p style={{color:"#5a3a18",fontSize:11,letterSpacing:5,marginTop:3}}>HÁZI RANGLISTA</p>
+        </div>
+
+        {!mode && !created && (
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            <button className="btn" onClick={()=>setMode("create")}
+              style={{padding:"16px",background:"linear-gradient(180deg,#1a4018,#0e2a0e)",
+                color:"#50c878",border:"1px solid #3a7030",borderRadius:8,
+                fontFamily:"'Rye',serif",fontSize:18,letterSpacing:2}}>
+              🆕 Új szoba létrehozása
+            </button>
+            <button className="btn" onClick={()=>setMode("join")}
+              style={{padding:"16px",background:"linear-gradient(180deg,#2a1a08,#1a0e04)",
+                color:"#e8b84b",border:"1px solid #6a4010",borderRadius:8,
+                fontFamily:"'Rye',serif",fontSize:18,letterSpacing:2}}>
+              🔑 Csatlakozás szoba kulccsal
+            </button>
+            <button className="btn" onClick={resetKey}
+              style={{padding:"8px",background:"transparent",color:"#3a2010",
+                border:"1px solid #2a1808",borderRadius:6,fontSize:12}}>
+              ← Más API kulcs megadása
+            </button>
+          </div>
+        )}
+
+        {mode==="create" && !created && (
+          <div style={{padding:22,border:"1px solid #2a4020",borderRadius:10,background:"#0a1208"}}>
+            <div style={{color:"#50c878",fontWeight:700,fontSize:16,marginBottom:12}}>🆕 Új szoba</div>
+            <input value={roomName} onChange={e=>setRoomName(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&createRoom()}
+              placeholder="Szoba neve (pl. Pali csapata)"
+              style={{width:"100%",background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
+                borderRadius:5,padding:"10px 14px",fontSize:15,marginBottom:10,outline:"none"}}/>
+            {err&&<div style={{color:"#f08080",fontSize:13,marginBottom:10}}>⚠️ {err}</div>}
+            <div style={{display:"flex",gap:8}}>
+              <button className="btn" onClick={()=>{setMode("");setErr("");}}
+                style={{flex:1,padding:"10px",background:"#1a1008",color:"#6a4a20",
+                  border:"1px solid #2a1808",borderRadius:5,fontSize:14}}>← Vissza</button>
+              <button className="btn" onClick={createRoom} disabled={loading}
+                style={{flex:2,padding:"10px",background:"linear-gradient(180deg,#1a4018,#0e2a0e)",
+                  color:"#50c878",border:"1px solid #3a7030",borderRadius:5,fontSize:15,fontWeight:700}}>
+                {loading?<span className="spin">⟳</span>:"Létrehozás"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {created && (
+          <div style={{padding:22,border:"1px solid #2a4020",borderRadius:10,background:"#0a1208",textAlign:"center"}}>
+            <div style={{color:"#50c878",fontWeight:700,fontSize:16,marginBottom:6}}>✅ Szoba létrehozva!</div>
+            <div style={{color:"#4a6a4a",fontSize:13,marginBottom:16,lineHeight:1.8}}>
+              Mentsd el ezt a kulcsot — ezzel tudnak mások csatlakozni:
+            </div>
+            <div style={{background:"#060e06",border:"1px solid #2a5020",borderRadius:6,
+              padding:"14px",marginBottom:14,fontFamily:"monospace",fontSize:14,
+              color:"#80d080",wordBreak:"break-all",letterSpacing:1}}>
+              {created.id}
+            </div>
+            <button className="btn" onClick={()=>{
+              navigator.clipboard?.writeText(created.id).then(()=>{}).catch(()=>{});
+            }} style={{fontSize:12,color:"#5a8050",background:"transparent",border:"1px solid #2a4020",
+              borderRadius:4,padding:"4px 12px",marginBottom:14,cursor:"pointer"}}>
+              📋 Kulcs másolása
+            </button>
+            <button className="btn" onClick={enterCreated}
+              style={{width:"100%",padding:"12px",background:"linear-gradient(180deg,#3a2208,#231504)",
+                color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,
+                fontFamily:"'Rye',serif",fontSize:17,letterSpacing:2}}>
+              Belépés a szobába →
+            </button>
+          </div>
+        )}
+
+        {mode==="join" && (
+          <div style={{padding:22,border:"1px solid #3a2010",borderRadius:10,background:"#100c06"}}>
+            <div style={{color:"#e8b84b",fontWeight:700,fontSize:16,marginBottom:12}}>🔑 Szoba kulcs</div>
+            <input value={roomKey} onChange={e=>setRoomKey(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&joinRoom()}
+              placeholder="Másold be a szoba kulcsát..."
+              style={{width:"100%",background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
+                borderRadius:5,padding:"10px 14px",fontSize:14,marginBottom:10,outline:"none",
+                fontFamily:"monospace"}}/>
+            {err&&<div style={{color:"#f08080",fontSize:13,marginBottom:10}}>⚠️ {err}</div>}
+            <div style={{display:"flex",gap:8}}>
+              <button className="btn" onClick={()=>{setMode("");setErr("");}}
+                style={{flex:1,padding:"10px",background:"#1a1008",color:"#6a4a20",
+                  border:"1px solid #2a1808",borderRadius:5,fontSize:14}}>← Vissza</button>
+              <button className="btn" onClick={joinRoom} disabled={loading}
+                style={{flex:2,padding:"10px",background:"linear-gradient(180deg,#2a1a08,#1a0e04)",
+                  color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,fontSize:15,fontWeight:700}}>
+                {loading?<span className="spin">⟳</span>:"Csatlakozás"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── FŐ APP ────────────────────────────────────────────────────────────────────
+
+
+const ROLES = {
+  seriff:    { label:"Seriff",    icon:"🤠", color:"#e8b84b", dark:"#3a2408", team:"seriff",  base:4 },
+  helyettes: { label:"Helyettes", icon:"⭐", color:"#c89030", dark:"#2e1c06", team:"seriff",  base:3 },
+  bandita:   { label:"Bandita",   icon:"💀", color:"#e05050", dark:"#380c0c", team:"bandita", base:2 },
+  renegat:   { label:"Renegát",   icon:"🃏", color:"#50c878", dark:"#0c3018", team:"renegat", base:6 },
+};
+const CONFIGS = {
+  5: { slots:["seriff","helyettes","bandita","bandita","renegat"],             mult:1.0 },
+  6: { slots:["seriff","helyettes","helyettes","bandita","bandita","renegat"], mult:1.2 },
+};
+const WIN_TEAMS = {
+  seriff:  { label:"Seriff csapata", icon:"🤠", color:"#e8b84b" },
+  bandita: { label:"Banditák",       icon:"💀", color:"#e05050" },
+  renegat: { label:"Renegát",        icon:"🃏", color:"#50c878" },
+};
+
+function calcPts(role, winTeam, pc) {
+  const cfg = CONFIGS[pc]; if (!cfg) return 0;
+  const r = ROLES[role]; if (!r || r.team !== winTeam) return 0;
+  return Math.round(r.base * cfg.mult * 10) / 10;
+}
+
+function buildLB(players, games) {
+  const s = {};
+  players.forEach(p => {
+    s[p.id] = { id:p.id, name:p.name, pts:0, wins:0, played:0,
+      roles:{}, teamStats:{}, pcStats:{5:{p:0,w:0},6:{p:0,w:0}},
+      streak:0, maxStreak:0, maxLoseStreak:0, teammates:{},
+      nemesis:{}, // pid -> hányszor nyert ellenünk
+      scoreHistory:[] // [{date,pts,cumPts}]
+    };
+  });
+  [...games].reverse().forEach(g => {
+    const teamOf = {};
+    g.assignments.forEach(a => { teamOf[a.pid] = ROLES[a.role]?.team; });
+    g.assignments.forEach(a => {
+      const st = s[a.pid]; if (!st) return;
+      const pts = calcPts(a.role, g.winTeam, g.pc);
+      const won = pts > 0;
+      st.pts += pts; st.played++;
+      if (won) st.wins++;
+      st.roles[a.role] = (st.roles[a.role]||0) + 1;
+      const team = ROLES[a.role]?.team;
+      if (team) {
+        if (!st.teamStats[team]) st.teamStats[team] = {p:0,w:0};
+        st.teamStats[team].p++; if (won) st.teamStats[team].w++;
+      }
+      if (st.pcStats[g.pc]) { st.pcStats[g.pc].p++; if(won) st.pcStats[g.pc].w++; }
+      if (won) {
+        g.assignments.forEach(b => {
+          if (b.pid===a.pid || teamOf[b.pid]!==team) return;
+          st.teammates[b.pid] = (st.teammates[b.pid]||0) + 1;
+        });
+      } else {
+        // vereség: kik voltak a győztes csapaton (ők a "nemezis" jelöltek)
+        g.assignments.forEach(b => {
+          if (b.pid===a.pid) return;
+          if (ROLES[b.role]?.team === g.winTeam) {
+            st.nemesis[b.pid] = (st.nemesis[b.pid]||0) + 1;
+          }
+        });
+      }
+    });
+  });
+  // Streak + scoreHistory (játékok időrendben: games[0]=legújabb, reverse=legrégebbi először)
+  players.forEach(p => {
+    if (!s[p.id]) return;
+    let cur=0, maxW=0, curL=0, maxL=0, streak=0, counting=true;
+    let cumPts=0;
+    [...games].reverse().forEach(g => {
+      const a = g.assignments.find(x=>x.pid===p.id); if (!a) return;
+      const pts = calcPts(a.role,g.winTeam,g.pc);
+      const won = pts > 0;
+      cumPts += pts;
+      s[p.id].scoreHistory.push({date:g.date, pts, cumPts});
+      if (won) { cur++; maxW=Math.max(maxW,cur); curL=0; if(counting) streak++; }
+      else { curL++; maxL=Math.max(maxL,curL); cur=0; counting=false; }
+    });
+    s[p.id].streak=streak; s[p.id].maxStreak=maxW; s[p.id].maxLoseStreak=maxL;
+  });
+  return Object.values(s).sort((a,b)=>b.pts-a.pts||b.wins-a.wins);
+}
+
+function Bar({ won, played, color }) {
+  const pct = played>0 ? Math.round(won/played*100) : 0;
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:7,flex:1}}>
+      <div style={{flex:1,height:5,background:"#1a1208",borderRadius:3,overflow:"hidden"}}>
+        <div style={{width:`${pct}%`,height:"100%",background:color,borderRadius:3}}/>
+      </div>
+      <span style={{fontSize:12,color,minWidth:30,textAlign:"right",fontWeight:700}}>{pct}%</span>
+    </div>
+  );
+}
+function Badge({ label, val, sub, color="#e8b84b" }) {
+  return (
+    <div style={{textAlign:"center",padding:"8px 10px",background:"#0e0a05",borderRadius:6,
+      border:"1px solid #2a1808",flex:1,minWidth:62}}>
+      <div style={{fontFamily:"'Rye',serif",fontSize:21,color,lineHeight:1}}>{val}</div>
+      {sub&&<div style={{fontSize:10,color:"#5a4020",marginTop:1}}>{sub}</div>}
+      <div style={{fontSize:10,color:"#3a2a10",marginTop:3,letterSpacing:1,textTransform:"uppercase"}}>{label}</div>
+    </div>
+  );
+}
+function Sec({ title, children }) {
+  return (
+    <div style={{marginBottom:11,padding:11,background:"#0c0a06",borderRadius:5,border:"1px solid #1e1208"}}>
+      <div style={{color:"#4a2e10",fontSize:10,letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>{title}</div>
+      {children}
+    </div>
+  );
+}
+function Row({ children }) {
+  return <div style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:"1px solid #1a1206"}}>{children}</div>;
+}
+function Empty({ children }) {
+  return <div style={{textAlign:"center",color:"#5a3a18",padding:"34px 14px",lineHeight:2,
+    fontSize:14,border:"1px dashed #2a1808",borderRadius:6}}>{children}</div>;
+}
+
+function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
+  const [players,  setPlayers]  = useState([]);
+  const [games,    setGames]    = useState([]);
+  const [view,     setView]     = useState("lb");
+  const [toast,    setToast]    = useState(null);
+  const [expanded, setExpanded] = useState(null);
+  const [stab,     setStab]     = useState("players");
+  const [newName,  setNewName]  = useState("");
+  const [pc,       setPc]       = useState(5);
+  const [assign,   setAssign]   = useState({});
+  const [winner,   setWinner]   = useState("");
+  const [date,     setDate]     = useState(new Date().toISOString().slice(0,10));
+  const [rounds,   setRounds]   = useState("");
+  const [syncStatus, setSyncStatus] = useState("idle"); // idle|saving|ok|err
+  const [lastSync,   setLastSync]   = useState(null);
+
+
+  // ── SZOBA / JSONBIN SYNC ─────────────────────────────────────────────
+
+  const notify = (msg, err=false) => {
+    setToast({msg,err}); setTimeout(()=>setToast(null),3000);
+  };
+
+  // Betöltés induláskor — initData-ból vagy JSONBin-ből
+  useEffect(()=>{
+    if(initPlayers && initGames) {
+      setPlayers(initPlayers); setGames(initGames);
+    } else {
+      (async()=>{
+        setSyncStatus("saving");
+        try {
+          const d = await jbRead(roomId, apiKey);
+          if(d && d.players) { setPlayers(d.players||[]); setGames(d.games||[]); }
+          setSyncStatus("ok");
+          setTimeout(()=>setSyncStatus("idle"),2000);
+        } catch(e) { setSyncStatus("err"); }
+      })();
+    }
+  }, []);
+
+  const update = async (p, g) => {
+    setPlayers(p); setGames(g);
+    setSyncStatus("saving");
+    try {
+      await jbWrite(roomId, apiKey, { players:p, games:g });
+      setSyncStatus("ok");
+      setTimeout(()=>setSyncStatus("idle"),2000);
+    } catch(e) {
+      setSyncStatus("err");
+      notify("Szinkronizálási hiba!", true);
+    }
+  };
+
+  const addPlayer = () => {
+    const name = newName.trim(); if (!name) return;
+    if (players.find(p=>p.name.toLowerCase()===name.toLowerCase())) { notify("Már létezik!",true); return; }
+    update([...players,{id:Date.now().toString(),name}], games);
+    setNewName(""); notify(`${name} hozzáadva ✓`);
+  };
+  const delPlayer = id => update(players.filter(p=>p.id!==id), games);
+
+  const cfg = CONFIGS[pc]; const slots = cfg.slots;
+  const used = Object.values(assign).filter(Boolean);
+  const allOk = slots.every((_,i)=>assign[i]) && used.length===new Set(used).size && winner;
+
+  const doGameSave = () => {
+    if (!allOk) return;
+    const ng = { id:Date.now().toString(), date, pc, winTeam:winner,
+      rounds: rounds ? parseInt(rounds) : null,
+      assignments:slots.map((role,i)=>({pid:assign[i],role})) };
+    update(players, [ng,...games]);
+    setAssign({}); setWinner(""); setRounds(""); setView("lb"); notify("Játék mentve ✓");
+  };
+  const delGame = id => update(players, games.filter(g=>g.id!==id));
+
+
+
+  // Manuel szinkronizálás
+  const doSync = async () => {
+    if(!apiKey||!roomId) return;
+    setSyncStatus("saving");
+    try {
+      const d = await jbRead(roomId, apiKey);
+      if(d && d.players && d.games) {
+        setPlayers(d.players); setGames(d.games);
+      }
+      setSyncStatus("ok");
+      setLastSync(new Date().toLocaleTimeString("hu-HU",{hour:"2-digit",minute:"2-digit"}));
+      setTimeout(()=>setSyncStatus("idle"),2000);
+    } catch(e) {
+      setSyncStatus("err");
+      notify("Szinkronizálási hiba!", true);
+    }
+  };
+
+  // Auto-szinkronizálás 30 másodpercenként
+  useEffect(()=>{
+    const id = setInterval(doSync, 30000);
+    return ()=>clearInterval(id);
+  }, []);
+
+  const lb = buildLB(players, games);
+  const medals = ["🥇","🥈","🥉"];
+
+  return (
+    <div style={S.root}>
+      <style>{CSS}</style>
+
+      {toast&&(
+        <div style={{position:"fixed",top:14,left:"50%",transform:"translateX(-50%)",
+          background:toast.err?"#250808":"#081a08",border:`1px solid ${toast.err?"#8b2020":"#1a6a1a"}`,
+          color:toast.err?"#f08080":"#80c880",padding:"9px 20px",borderRadius:6,
+          fontFamily:"'Playfair Display',serif",fontSize:14,zIndex:9999,
+          boxShadow:"0 6px 24px #000c",animation:"ti .2s ease both",whiteSpace:"nowrap"}}>
+          {toast.msg}
+        </div>
+      )}
+
+      <header style={S.hdr}>
+        <div style={S.deco}>— ✦ ✦ ✦ —</div>
+        <h1 style={S.title}>BANG!</h1>
+        <p style={S.sub}>H Á Z I &nbsp; R A N G L I S T A</p>
+        {roomName&&<div style={{marginTop:4,fontSize:11,color:"#5a3a18",letterSpacing:2}}>
+          🏠 {roomName}
+        </div>}
+        <div style={S.deco}>— ✦ ✦ ✦ —</div>
+        <div style={{marginTop:7,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          <span style={{fontSize:11,letterSpacing:1,color:
+            syncStatus==="ok"?"#3a6a3a":syncStatus==="err"?"#6a2020":syncStatus==="saving"?"#6a5a20":"#3a2a10"}}>
+            {syncStatus==="saving"?"⏳ Mentés...":syncStatus==="ok"?"✅ Szinkronizálva":syncStatus==="err"?"⚠️ Hiba":"☁️ Szinkronizálva"}
+          </span>
+          <button className="btn" onClick={doSync}
+            style={{fontSize:11,color:"#5a3a18",background:"transparent",border:"1px solid #2a1808",
+              borderRadius:4,padding:"2px 8px",cursor:"pointer"}}>
+            🔄
+          </button>
+        </div>
+      </header>
+
+      <nav style={S.nav}>
+        {[{k:"lb",l:"🏆 Ranglista"},{k:"stats",l:"📊 Statisztika"},
+          {k:"new",l:"🃏 Új Játék"},{k:"pl",l:"👥 Játékosok"},
+          {k:"hist",l:"📜 Előzmények"}
+        ].map(({k,l})=>(
+          <button key={k} className={`btn nb${view===k?" on":""}`}
+            onClick={()=>setView(k)}
+            style={{...S.navBtn,color:view===k?"#e8b84b":"#7a5a28",}}>{l}</button>
+        ))}
+        <button className="btn" onClick={()=>{if(window.confirm("Kilépsz a szobából?")) onLeaveRoom();}}
+          style={{...S.navBtn,color:"#4a2010"}}>🚪 Kilépés</button>
+      </nav>
+
+      <main style={S.main}>
+
+        {/* ══ RANGLISTA ══ */}
+        {view==="lb"&&(
+          <div className="fu">
+            <h2 style={S.sh}>Végeredmény</h2>
+            {lb.length===0
+              ? <Empty>Adj hozzá játékosokat, majd rögzíts egy játékot.</Empty>
+              : lb.map((p,i)=>{
+                const isExp=expanded===p.id;
+                const bc=["#e8b84b","#b0b0b0","#c07830"][i]||"#2a1808";
+                const wr=p.played>0?Math.round(p.wins/p.played*100):0;
+                return (
+                  <div key={p.id} style={{marginBottom:5}}>
+                    <div className="hov sr" onClick={()=>setExpanded(isExp?null:p.id)}
+                      style={{display:"flex",alignItems:"center",gap:10,padding:"11px 13px",
+                        borderRadius:isExp?"6px 6px 0 0":"6px",
+                        background:isExp?"#181008":"#100c06",
+                        borderLeft:`3px solid ${bc}`,cursor:"pointer",
+                        animationDelay:`${i*.06}s`}}>
+                      <div style={{width:26,textAlign:"center",flexShrink:0}}>
+                        {i<3?<span style={{fontSize:20}}>{medals[i]}</span>
+                          :<span style={{color:"#4a3020",fontSize:12,fontFamily:"'Rye',serif"}}>#{i+1}</span>}
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{display:"flex",alignItems:"center",gap:6}}>
+                          <span style={{fontSize:17,color:"#d0a860",fontWeight:700}}>{p.name}</span>
+                          {p.streak>=3&&<span style={{fontSize:10,background:"#3a1a08",color:"#e8b84b",
+                            padding:"1px 5px",borderRadius:10,border:"1px solid #5a3010"}}>🔥{p.streak}</span>}
+                        </div>
+                        <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:3}}>
+                          {Object.entries(p.roles).map(([role,cnt])=>(
+                            <span key={role} style={{fontSize:10,padding:"1px 5px",borderRadius:10,fontWeight:600,
+                              background:ROLES[role].dark,color:ROLES[role].color,
+                              border:`1px solid ${ROLES[role].color}33`}}>
+                              {ROLES[role].icon}{cnt}×
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div style={{textAlign:"right",flexShrink:0}}>
+                        <div style={{fontFamily:"'Rye',serif",fontSize:20,color:"#e8b84b",lineHeight:1}}>
+                          {p.pts.toFixed(1)}<span style={{fontSize:10,color:"#6a4a20"}}> pt</span>
+                        </div>
+                        <div style={{fontSize:11,color:"#4a3018",marginTop:2}}>{wr}% · {p.wins}/{p.played}</div>
+                      </div>
+                      <div style={{color:"#3a2810",fontSize:11,marginLeft:2}}>{isExp?"▲":"▼"}</div>
+                    </div>
+                    {isExp&&(
+                      <div style={{background:"#130e06",border:"1px solid #2a1808",borderTop:"none",
+                        borderRadius:"0 0 6px 6px",padding:13}}>
+                        <div style={{display:"flex",gap:7,flexWrap:"wrap",marginBottom:11}}>
+                          <Badge label="Pontszám"  val={p.pts.toFixed(1)} color="#e8b84b"/>
+                          <Badge label="Gy. arány" val={`${wr}%`} sub={`${p.wins}/${p.played}`} color={wr>=50?"#50c878":"#e05050"}/>
+                          <Badge label="Max sor."  val={p.maxStreak} color="#c89030"/>
+                          {p.streak>0&&<Badge label="Jelenlegi" val={`${p.streak}🔥`} color="#e8b84b"/>}
+                        </div>
+                        <Sec title="Szerep győzési arányok">
+                          {Object.keys(p.roles).map(role=>{
+                            const rs={won:0,played:0};
+                            games.forEach(g=>{
+                              const a=g.assignments.find(x=>x.pid===p.id&&x.role===role);
+                              if(!a) return; rs.played++;
+                              if(calcPts(role,g.winTeam,g.pc)>0) rs.won++;
+                            });
+                            return (
+                              <Row key={role}>
+                                <span style={{color:ROLES[role].color,minWidth:98,fontSize:13}}>{ROLES[role].icon} {ROLES[role].label}</span>
+                                <span style={{color:"#3a2810",fontSize:11,minWidth:40}}>{rs.won}/{rs.played}</span>
+                                <Bar won={rs.won} played={rs.played} color={ROLES[role].color}/>
+                              </Row>
+                            );
+                          })}
+                        </Sec>
+                        <Sec title="Csapatszín teljesítmény">
+                          {Object.entries(p.teamStats).filter(([,v])=>v.p>0).map(([team,v])=>(
+                            <Row key={team}>
+                              <span style={{color:WIN_TEAMS[team].color,minWidth:118,fontSize:13}}>{WIN_TEAMS[team].icon} {WIN_TEAMS[team].label}</span>
+                              <span style={{color:"#3a2810",fontSize:11,minWidth:40}}>{v.w}/{v.p}</span>
+                              <Bar won={v.w} played={v.p} color={WIN_TEAMS[team].color}/>
+                            </Row>
+                          ))}
+                        </Sec>
+                        <Sec title="Létszám szerint">
+                          <div style={{display:"flex",gap:8}}>
+                            {[5,6].map(n=>{
+                              const v=p.pcStats[n]; if(!v||v.p===0) return null;
+                              const pct=Math.round(v.w/v.p*100);
+                              return (
+                                <div key={n} style={{flex:1,textAlign:"center",padding:10,
+                                  background:"#0e0a05",borderRadius:6,border:"1px solid #2a1808"}}>
+                                  <div style={{fontFamily:"'Rye',serif",fontSize:15,color:"#c89030"}}>{n} fős</div>
+                                  <div style={{fontFamily:"'Rye',serif",fontSize:20,color:pct>=50?"#50c878":"#e05050"}}>{pct}%</div>
+                                  <div style={{fontSize:11,color:"#3a2810"}}>{v.w}G/{v.p}J</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </Sec>
+                        {Object.keys(p.teammates).length>0&&(
+                          <Sec title="Legjobb csapattársak">
+                            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                              {Object.entries(p.teammates).sort(([,a],[,b])=>b-a).slice(0,5).map(([pid,cnt])=>{
+                                const mate=players.find(x=>x.id===pid); if(!mate) return null;
+                                return (
+                                  <span key={pid} style={{padding:"3px 10px",background:"#0e0a05",
+                                    border:"1px solid #2a1808",borderRadius:20,fontSize:12}}>
+                                    <span style={{color:"#c8a060"}}>{mate.name}</span>
+                                    <span style={{color:"#50c878",marginLeft:5,fontWeight:700}}>{cnt}×</span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </Sec>
+                        )}
+                        {(()=>{
+                          const recent=[];
+                          for(const g of games){
+                            const a=g.assignments.find(x=>x.pid===p.id); if(!a) continue;
+                            recent.push({won:calcPts(a.role,g.winTeam,g.pc)>0,role:a.role});
+                            if(recent.length>=5) break;
+                          }
+                          if(!recent.length) return null;
+                          return (
+                            <Sec title="Legutóbbi forma">
+                              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                                {recent.map((r,i)=>(
+                                  <span key={i} style={{padding:"4px 10px",borderRadius:20,fontSize:12,
+                                    background:r.won?"#0a2a0a":"#2a0a0a",
+                                    border:`1px solid ${r.won?"#1a5a1a":"#5a1a1a"}`,
+                                    color:r.won?"#50c878":"#e05050"}}>
+                                    {ROLES[r.role]?.icon} {r.won?"Győzelem":"Vereség"}
+                                  </span>
+                                ))}
+                              </div>
+                            </Sec>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            }
+            <div style={{marginTop:22,padding:13,border:"1px solid #2a1808",borderRadius:6,background:"#0e0a05"}}>
+              <div style={{fontFamily:"'Rye',serif",color:"#5a3a18",fontSize:11,letterSpacing:2,textAlign:"center",marginBottom:9}}>PONTOZÁS</div>
+              {Object.entries(ROLES).map(([k,r])=>(
+                <div key={k} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",borderBottom:"1px solid #1a1206",fontSize:12}}>
+                  <span>{r.icon}</span>
+                  <span style={{color:r.color,fontWeight:700,minWidth:82}}>{r.label}</span>
+                  <span style={{color:"#5a3a18"}}>{r.base} pt</span>
+                  <span style={{color:"#3a2010",marginLeft:"auto",fontSize:11}}>6 fős: {Math.round(r.base*1.2*10)/10} pt</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ══ STATISZTIKA ══ */}
+        {view==="stats"&&(
+          <div className="fu">
+            <h2 style={S.sh}>Részletes statisztikák</h2>
+            {games.length===0?<Empty>Még nincsenek rögzített játékok.</Empty>:<>
+              <div style={{display:"flex",gap:3,marginBottom:14,background:"#0e0a05",
+                padding:4,borderRadius:6,border:"1px solid #2a1808"}}>
+                {[{k:"players",l:"Játékos elemzés"},{k:"global",l:"Globális"}].map(({k,l})=>(
+                  <button key={k} className="btn" onClick={()=>setStab(k)}
+                    style={{flex:1,padding:"8px",borderRadius:4,fontSize:13,
+                      background:stab===k?"#2a1a08":"transparent",
+                      color:stab===k?"#e8b84b":"#5a3a18",
+                      border:`1px solid ${stab===k?"#6a4010":"transparent"}`}}>{l}</button>
+                ))}
+              </div>
+              {stab==="players"&&lb.filter(p=>p.played>0).map((p,i)=>{
+                const wr=Math.round(p.wins/p.played*100);
+                const avgPts=p.played>0?(p.pts/p.played).toFixed(1):"—";
+                const favRole=Object.entries(p.roles).sort(([,a],[,b])=>b-a)[0];
+                // Nemezis: ki ellen veszt a legtöbbet
+                const nemesisList = Object.entries(p.nemesis)
+                  .map(([pid,cnt])=>({pid,cnt,name:players.find(x=>x.id===pid)?.name}))
+                  .filter(x=>x.name).sort((a,b)=>b.cnt-a.cnt).slice(0,3);
+                // Utolsó 5 vs összes átlag
+                const hist = p.scoreHistory;
+                const last5 = hist.slice(-5);
+                const last5avg = last5.length>0?(last5.reduce((s,x)=>s+x.pts,0)/last5.length).toFixed(1):"—";
+                const allAvg = hist.length>0?(hist.reduce((s,x)=>s+x.pts,0)/hist.length).toFixed(1):"—";
+                const trend = last5.length>0 && allAvg!=="—"
+                  ? (parseFloat(last5avg)>parseFloat(allAvg)?"📈 Javuló":parseFloat(last5avg)<parseFloat(allAvg)?"📉 Romló":"➡️ Stabil")
+                  : null;
+                return (
+                  <div key={p.id} className="sr" style={{marginBottom:13,animationDelay:`${i*.06}s`}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 13px",
+                      background:"#181008",borderRadius:"6px 6px 0 0",
+                      borderLeft:`3px solid ${["#e8b84b","#b0b0b0","#c07830"][i]||"#3a2010"}`}}>
+                      <span style={{fontFamily:"'Rye',serif",fontSize:12,
+                        color:["#e8b84b","#b0b0b0","#c07830"][i]||"#3a2010",minWidth:22}}>
+                        {i<3?medals[i]:`#${i+1}`}
+                      </span>
+                      <span style={{fontSize:16,color:"#d0a860",fontWeight:700,flex:1}}>{p.name}</span>
+                      <span style={{fontFamily:"'Rye',serif",fontSize:17,color:"#e8b84b"}}>{p.pts.toFixed(1)} pt</span>
+                    </div>
+                    <div style={{background:"#100c06",border:"1px solid #2a1808",borderTop:"none",borderRadius:"0 0 6px 6px",padding:11}}>
+                      {/* Fő badgek */}
+                      <div style={{display:"flex",gap:7,flexWrap:"wrap",marginBottom:11}}>
+                        <Badge label="Gy. arány" val={`${wr}%`} sub={`${p.wins}/${p.played}`} color={wr>=50?"#50c878":"#e05050"}/>
+                        <Badge label="Átl. pt/játék" val={avgPts} color="#e8b84b"/>
+                        <Badge label="Max gy. sor." val={p.maxStreak} color="#c89030"/>
+                        <Badge label="Max veszt. sor." val={p.maxLoseStreak} color="#c05050"/>
+                        {p.streak>0&&<Badge label="Jelenlegi" val={`${p.streak}🔥`} color="#e8b84b"/>}
+                      </div>
+
+                      {/* Pontszám időbeli trendje — mini sparkline */}
+                      {hist.length>1&&(()=>{
+                        const maxC=Math.max(...hist.map(x=>x.cumPts),0.1);
+                        const W=280, H=44;
+                        const pts2 = hist.map((h,i)=>({
+                          x: Math.round(i/(hist.length-1)*(W-4))+2,
+                          y: Math.round((1-h.cumPts/maxC)*(H-4))+2
+                        }));
+                        const path = pts2.map((p,i)=>`${i===0?"M":"L"}${p.x},${p.y}`).join(" ");
+                        return (
+                          <Sec title={`Pontszám alakulása időben${trend?" — "+trend:""}`}>
+                            <div style={{display:"flex",alignItems:"center",gap:12}}>
+                              <svg width={W} height={H} style={{flex:1,maxWidth:W}}>
+                                <path d={path} fill="none" stroke="#e8b84b" strokeWidth="1.5" strokeLinejoin="round"/>
+                                {pts2.map((pt,i)=>(
+                                  <circle key={i} cx={pt.x} cy={pt.y} r="2.5" fill="#e8b84b" opacity="0.7"/>
+                                ))}
+                              </svg>
+                              <div style={{textAlign:"right",flexShrink:0}}>
+                                <div style={{fontSize:11,color:"#5a3a18"}}>Összes átl.</div>
+                                <div style={{fontFamily:"'Rye',serif",color:"#c89030",fontSize:16}}>{allAvg} pt</div>
+                                <div style={{fontSize:11,color:"#5a3a18",marginTop:4}}>Utolsó 5 átl.</div>
+                                <div style={{fontFamily:"'Rye',serif",color:parseFloat(last5avg)>=parseFloat(allAvg)?"#50c878":"#e05050",fontSize:16}}>{last5avg} pt</div>
+                              </div>
+                            </div>
+                          </Sec>
+                        );
+                      })()}
+
+                      {/* Nemezis */}
+                      {nemesisList.length>0&&(
+                        <Sec title="Legeredményesebb ellenfél (ki nyert ellenünk legtöbbször)">
+                          <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                            {nemesisList.map((n,i)=>(
+                              <span key={i} style={{padding:"4px 11px",background:"#1e0808",
+                                border:"1px solid #5a1a1a",borderRadius:20,fontSize:12}}>
+                                <span style={{color:"#e08080"}}>{n.name}</span>
+                                <span style={{color:"#c05050",marginLeft:5,fontWeight:700}}>{n.cnt}× győzött ellenünk</span>
+                              </span>
+                            ))}
+                          </div>
+                        </Sec>
+                      )}
+
+                      {/* Szerep győzési arányok */}
+                      <div style={{marginBottom:10}}>
+                        <div style={{color:"#3a2810",fontSize:10,letterSpacing:2,textTransform:"uppercase",marginBottom:7}}>Szerep győzési arányok</div>
+                        {Object.keys(p.roles).map(role=>{
+                          const rs={won:0,played:0};
+                          games.forEach(g=>{
+                            const a=g.assignments.find(x=>x.pid===p.id&&x.role===role);
+                            if(!a) return; rs.played++;
+                            if(calcPts(role,g.winTeam,g.pc)>0) rs.won++;
+                          });
+                          return (
+                            <div key={role} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
+                              <span style={{color:ROLES[role].color,width:92,fontSize:12,flexShrink:0}}>{ROLES[role].icon} {ROLES[role].label}</span>
+                              <Bar won={rs.won} played={rs.played} color={ROLES[role].color}/>
+                              <span style={{color:"#3a2810",fontSize:11,minWidth:33,textAlign:"right"}}>{rs.won}/{rs.played}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Csapatszín */}
+                      <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+                        {Object.entries(p.teamStats).filter(([,v])=>v.p>0).map(([team,v])=>{
+                          const pct=Math.round(v.w/v.p*100);
+                          return (
+                            <div key={team} style={{flex:1,minWidth:85,padding:9,background:"#0e0a05",
+                              borderRadius:6,border:`1px solid ${WIN_TEAMS[team].color}33`,textAlign:"center"}}>
+                              <div style={{fontSize:17}}>{WIN_TEAMS[team].icon}</div>
+                              <div style={{color:WIN_TEAMS[team].color,fontSize:11,fontWeight:700}}>{WIN_TEAMS[team].label.split(" ")[0]}</div>
+                              <div style={{fontFamily:"'Rye',serif",fontSize:18,color:pct>=50?"#50c878":"#e05050"}}>{pct}%</div>
+                              <div style={{fontSize:10,color:"#3a2810"}}>{v.w}G/{v.p}J</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {stab==="global"&&(()=>{
+                const tw={seriff:0,bandita:0,renegat:0};
+                const rw={}; Object.keys(ROLES).forEach(r=>{rw[r]={p:0,w:0};});
+                games.forEach(g=>{
+                  tw[g.winTeam]=(tw[g.winTeam]||0)+1;
+                  g.assignments.forEach(a=>{
+                    if(!rw[a.role]) return; rw[a.role].p++;
+                    if(ROLES[a.role]?.team===g.winTeam) rw[a.role].w++;
+                  });
+                });
+                const pairs={};
+                games.forEach(g=>{
+                  const byTeam={};
+                  g.assignments.forEach(a=>{const t=ROLES[a.role]?.team;if(!byTeam[t])byTeam[t]=[];byTeam[t].push(a.pid);});
+                  (byTeam[g.winTeam]||[]).forEach((a,i,arr)=>arr.forEach((b,j)=>{
+                    if(j<=i) return;
+                    const key=[a,b].sort().join("_"); pairs[key]=(pairs[key]||0)+1;
+                  }));
+                });
+                const topPairs=Object.entries(pairs).map(([k,cnt])=>{
+                  const [a,b]=k.split("_");
+                  return {a:players.find(x=>x.id===a)?.name,b:players.find(x=>x.id===b)?.name,cnt};
+                }).filter(x=>x.a&&x.b).sort((a,b)=>b.cnt-a.cnt).slice(0,6);
+                return (
+                  <div>
+                    <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:13}}>
+                      <Badge label="Össz játék" val={games.length} color="#e8b84b"/>
+                      <Badge label="5 fős" val={games.filter(g=>g.pc===5).length} color="#c89030"/>
+                      <Badge label="6 fős" val={games.filter(g=>g.pc===6).length} color="#c89030"/>
+                    </div>
+                    <Sec title="Csapatszínek győzelmi aránya">
+                      {Object.entries(tw).map(([team,wins])=>(
+                        <Row key={team}>
+                          <span style={{color:WIN_TEAMS[team].color,minWidth:118,fontSize:13}}>{WIN_TEAMS[team].icon} {WIN_TEAMS[team].label}</span>
+                          <span style={{color:"#3a2810",fontSize:11,minWidth:52}}>{wins} győz.</span>
+                          <Bar won={wins} played={games.length} color={WIN_TEAMS[team].color}/>
+                        </Row>
+                      ))}
+                    </Sec>
+                    <Sec title="Szerepek nehézségi táblázata — győzési % és átlagos pont">
+                      <div style={{color:"#5a3a18",fontSize:11,marginBottom:8}}>
+                        Azonos csapatnál több szerep (pl. 2 Helyettes) külön kerül kimutatásra.
+                      </div>
+                      {Object.entries(rw).filter(([,v])=>v.p>0).map(([role,v])=>{
+                        // Átlagos pont ebben a szerepben
+                        let totalPts=0, cnt=0;
+                        games.forEach(g=>{
+                          g.assignments.forEach(a=>{
+                            if(a.role!==role) return;
+                            totalPts+=calcPts(role,g.winTeam,g.pc); cnt++;
+                          });
+                        });
+                        const avgPt = cnt>0?(totalPts/cnt).toFixed(1):"—";
+                        return (
+                          <Row key={role}>
+                            <span style={{color:ROLES[role].color,minWidth:98,fontSize:13}}>{ROLES[role].icon} {ROLES[role].label}</span>
+                            <span style={{color:"#4a6a4a",fontSize:11,minWidth:52}}>átl. {avgPt} pt</span>
+                            <span style={{color:"#3a2810",fontSize:11,minWidth:40}}>{v.w}/{v.p}</span>
+                            <Bar won={v.w} played={v.p} color={ROLES[role].color}/>
+                          </Row>
+                        );
+                      })}
+                    </Sec>
+                    {topPairs.length>0&&(
+                      <Sec title="Legjobb párosok (közös győzelmek)">
+                        {topPairs.map((pair,i)=>(
+                          <div key={i} style={{display:"flex",justifyContent:"space-between",
+                            padding:"6px 10px",marginBottom:3,background:"#0e0a05",
+                            borderRadius:5,border:"1px solid #2a1808"}}>
+                            <span style={{color:"#c8a060",fontSize:13}}>{pair.a} + {pair.b}</span>
+                            <span style={{fontFamily:"'Rye',serif",color:"#50c878"}}>{pair.cnt}×</span>
+                          </div>
+                        ))}
+                      </Sec>
+                    )}
+
+                    {/* Legjobb Seriff-Helyettes páros */}
+                    {(()=>{
+                      const shPairs={};
+                      games.forEach(g=>{
+                        const seriffA = g.assignments.find(a=>a.role==="seriff");
+                        const helyA   = g.assignments.filter(a=>a.role==="helyettes");
+                        if(!seriffA||helyA.length===0) return;
+                        const won = g.winTeam==="seriff";
+                        helyA.forEach(h=>{
+                          const key=[seriffA.pid,h.pid].sort().join("_");
+                          if(!shPairs[key]) shPairs[key]={p:0,w:0,a:seriffA.pid,b:h.pid};
+                          shPairs[key].p++;
+                          if(won) shPairs[key].w++;
+                        });
+                      });
+                      const top = Object.values(shPairs)
+                        .filter(x=>x.p>=2)
+                        .sort((a,b)=>(b.w/b.p)-(a.w/a.p)||b.w-a.w)
+                        .slice(0,4)
+                        .map(x=>({
+                          ...x,
+                          na:players.find(p=>p.id===x.a)?.name,
+                          nb:players.find(p=>p.id===x.b)?.name,
+                          pct:Math.round(x.w/x.p*100)
+                        }))
+                        .filter(x=>x.na&&x.nb);
+                      if(!top.length) return null;
+                      return (
+                        <Sec title="Legjobb Seriff–Helyettes párosok">
+                          {top.map((t,i)=>(
+                            <Row key={i}>
+                              <span style={{color:"#e8b84b",minWidth:10,fontSize:13}}>🤠⭐</span>
+                              <span style={{color:"#c8a060",flex:1,fontSize:13}}>{t.na} + {t.nb}</span>
+                              <span style={{color:"#4a3018",fontSize:11,minWidth:40}}>{t.w}/{t.p}</span>
+                              <Bar won={t.w} played={t.p} color="#e8b84b"/>
+                            </Row>
+                          ))}
+                        </Sec>
+                      );
+                    })()}
+
+                    {/* Leggyakoribb csapatösszetétel */}
+                    {(()=>{
+                      const comps={};
+                      games.forEach(g=>{
+                        ["seriff","bandita","renegat"].forEach(team=>{
+                          const members = g.assignments
+                            .filter(a=>ROLES[a.role]?.team===team)
+                            .map(a=>players.find(p=>p.id===a.pid)?.name)
+                            .filter(Boolean).sort();
+                          if(members.length<2) return;
+                          const key=team+"::"+members.join("+");
+                          if(!comps[key]) comps[key]={team,members,count:0,wins:0};
+                          comps[key].count++;
+                          if(g.winTeam===team) comps[key].wins++;
+                        });
+                      });
+                      const top = Object.values(comps).sort((a,b)=>b.count-a.count).slice(0,5);
+                      if(!top.length) return null;
+                      return (
+                        <Sec title="Leggyakoribb csapatösszetételek">
+                          {top.map((c,i)=>(
+                            <div key={i} style={{display:"flex",alignItems:"center",gap:8,
+                              padding:"6px 0",borderBottom:"1px solid #1a1206"}}>
+                              <span style={{fontSize:14}}>{WIN_TEAMS[c.team]?.icon}</span>
+                              <span style={{color:"#c8a060",flex:1,fontSize:12}}>{c.members.join(" + ")}</span>
+                              <span style={{color:"#50c878",fontSize:12,minWidth:40}}>{c.wins}/{c.count}</span>
+                              <Bar won={c.wins} played={c.count} color={WIN_TEAMS[c.team]?.color||"#e8b84b"}/>
+                            </div>
+                          ))}
+                        </Sec>
+                      );
+                    })()}
+
+                    {/* Bandita győzési % amikor X a Seriff */}
+                    {(()=>{
+                      const bySeriff={};
+                      games.forEach(g=>{
+                        const sA = g.assignments.find(a=>a.role==="seriff");
+                        if(!sA) return;
+                        const sName = players.find(p=>p.id===sA.pid)?.name;
+                        if(!sName) return;
+                        if(!bySeriff[sName]) bySeriff[sName]={p:0,bandWin:0};
+                        bySeriff[sName].p++;
+                        if(g.winTeam==="bandita") bySeriff[sName].bandWin++;
+                      });
+                      const rows = Object.entries(bySeriff).filter(([,v])=>v.p>=2)
+                        .sort(([,a],[,b])=>(b.bandWin/b.p)-(a.bandWin/a.p));
+                      if(!rows.length) return null;
+                      return (
+                        <Sec title="Bandita győzési % — ki a Seriff? (ki ellen a legkönnyebb nyerni)">
+                          {rows.map(([name,v],i)=>(
+                            <Row key={i}>
+                              <span style={{color:"#e8b84b",minWidth:14}}>🤠</span>
+                              <span style={{color:"#c8a060",flex:1,fontSize:13}}>{name} a Seriff</span>
+                              <span style={{color:"#4a3018",fontSize:11,minWidth:40}}>{v.bandWin}/{v.p}</span>
+                              <Bar won={v.bandWin} played={v.p} color="#e05050"/>
+                            </Row>
+                          ))}
+                        </Sec>
+                      );
+                    })()}
+
+                    {/* Szerencsés Seriff + Jinx */}
+                    {(()=>{
+                      const bySeriffFull={};
+                      games.forEach(g=>{
+                        const sA = g.assignments.find(a=>a.role==="seriff");
+                        if(!sA) return;
+                        const pid = sA.pid;
+                        if(!bySeriffFull[pid]) bySeriffFull[pid]={p:0,seriffWin:0,ellenfélWin:0};
+                        bySeriffFull[pid].p++;
+                        if(g.winTeam==="seriff") bySeriffFull[pid].seriffWin++;
+                        else bySeriffFull[pid].ellenfélWin++;
+                      });
+                      const rows = Object.entries(bySeriffFull)
+                        .filter(([,v])=>v.p>=2)
+                        .map(([pid,v])=>({
+                          name: players.find(p=>p.id===pid)?.name,
+                          ...v,
+                          luckyPct: Math.round(v.seriffWin/v.p*100),
+                          jinxPct:  Math.round(v.ellenfélWin/v.p*100),
+                        }))
+                        .filter(x=>x.name);
+                      if(!rows.length) return null;
+                      return (<>
+                        <Sec title="🍀 Szerencsés Seriff — hány % ban nyeri meg a játékot ha ő a Seriff?">
+                          {[...rows].sort((a,b)=>b.luckyPct-a.luckyPct).map((r,i)=>(
+                            <Row key={i}>
+                              <span style={{color:"#e8b84b",minWidth:14}}>🤠</span>
+                              <span style={{color:"#c8a060",flex:1,fontSize:13}}>{r.name}</span>
+                              <span style={{color:"#4a3018",fontSize:11,minWidth:42}}>{r.seriffWin}/{r.p}</span>
+                              <Bar won={r.seriffWin} played={r.p} color="#e8b84b"/>
+                            </Row>
+                          ))}
+                        </Sec>
+                        <Sec title="🪄 Jinx — ha X a Seriff, az ellenfél hány % ban nyer?">
+                          <div style={{color:"#5a3a18",fontSize:11,marginBottom:8}}>
+                            Minél magasabb, annál nehezebb Seriff — az ellenfélnek jobban kedvez.
+                          </div>
+                          {[...rows].sort((a,b)=>b.jinxPct-a.jinxPct).map((r,i)=>(
+                            <Row key={i}>
+                              <span style={{color:"#e05050",minWidth:14}}>💀</span>
+                              <span style={{color:"#c8a060",flex:1,fontSize:13}}>{r.name} a Seriff</span>
+                              <span style={{color:"#4a3018",fontSize:11,minWidth:42}}>{r.ellenfélWin}/{r.p}</span>
+                              <Bar won={r.ellenfélWin} played={r.p} color="#e05050"/>
+                            </Row>
+                          ))}
+                        </Sec>
+                      </>);
+                    })()}
+
+                    {/* Konzisztencia + leghosszabb szerepsorozat */}
+                    {(()=>{
+                      // Konzisztencia: pontszám szórása játékonként
+                      const consistency = lb.filter(p=>p.scoreHistory.length>=3).map(p=>{
+                        const pts = p.scoreHistory.map(h=>h.pts);
+                        const avg = pts.reduce((s,x)=>s+x,0)/pts.length;
+                        const variance = pts.reduce((s,x)=>s+(x-avg)**2,0)/pts.length;
+                        const std = Math.sqrt(variance);
+                        return { name:p.name, std:std.toFixed(1), avg:avg.toFixed(1), played:p.played };
+                      }).sort((a,b)=>parseFloat(a.std)-parseFloat(b.std));
+
+                      // Ki játszotta legtöbbször ugyanazt a szerepet egymás után
+                      const roleStreaks = players.map(p=>{
+                        let best={role:null,cnt:0}, cur={role:null,cnt:0};
+                        games.slice().reverse().forEach(g=>{
+                          const a=g.assignments.find(x=>x.pid===p.id);
+                          if(!a) { cur={role:null,cnt:0}; return; }
+                          if(cur.role===a.role) { cur.cnt++; }
+                          else { cur={role:a.role,cnt:1}; }
+                          if(cur.cnt>best.cnt) best={...cur};
+                        });
+                        return {name:p.name, role:best.role, cnt:best.cnt};
+                      }).filter(x=>x.cnt>=2).sort((a,b)=>b.cnt-a.cnt);
+
+                      return (<>
+                        {consistency.length>0&&(
+                          <Sec title="📊 Konzisztencia — pontszám szórása (kisebb = megbízhatóbb teljesítmény)">
+                            {consistency.map((c,i)=>(
+                              <div key={i} style={{display:"flex",alignItems:"center",gap:8,
+                                padding:"5px 0",borderBottom:"1px solid #1a1206"}}>
+                                <span style={{color:"#c8a060",flex:1,fontSize:13}}>{c.name}</span>
+                                <span style={{color:"#5a4020",fontSize:11}}>{c.played} játék · átl. {c.avg} pt</span>
+                                <span style={{fontFamily:"'Rye',serif",
+                                  color:parseFloat(c.std)<1.5?"#50c878":parseFloat(c.std)<3?"#e8b84b":"#e05050",
+                                  fontSize:15,minWidth:50,textAlign:"right"}}>±{c.std}</span>
+                              </div>
+                            ))}
+                          </Sec>
+                        )}
+                        {roleStreaks.length>0&&(
+                          <Sec title="🔁 Leghosszabb azonos szerepsorozat egymás után">
+                            {roleStreaks.slice(0,5).map((r,i)=>(
+                              <div key={i} style={{display:"flex",alignItems:"center",gap:8,
+                                padding:"5px 0",borderBottom:"1px solid #1a1206"}}>
+                                <span style={{color:ROLES[r.role]?.color,minWidth:20,fontSize:14}}>{ROLES[r.role]?.icon}</span>
+                                <span style={{color:ROLES[r.role]?.color,fontSize:12,minWidth:70}}>{ROLES[r.role]?.label}</span>
+                                <span style={{color:"#c8a060",flex:1,fontSize:13}}>{r.name}</span>
+                                <span style={{fontFamily:"'Rye',serif",color:"#c89030",fontSize:16}}>{r.cnt}× egymás után</span>
+                              </div>
+                            ))}
+                          </Sec>
+                        )}
+                      </>);
+                    })()}
+
+                    {/* Átlagos körszám + időbeli adatok */}
+                    {(()=>{
+                      const withRounds = games.filter(g=>g.rounds);
+                      const avgRounds = withRounds.length>0
+                        ? (withRounds.reduce((s,g)=>s+g.rounds,0)/withRounds.length).toFixed(1) : null;
+                      // Legtöbb játék egy napon
+                      const byDay={};
+                      games.forEach(g=>{ byDay[g.date]=(byDay[g.date]||0)+1; });
+                      const topDay = Object.entries(byDay).sort(([,a],[,b])=>b-a)[0];
+                      // Legaktívabb hónap
+                      const byMonth={};
+                      games.forEach(g=>{ const m=g.date.slice(0,7); byMonth[m]=(byMonth[m]||0)+1; });
+                      const topMonth = Object.entries(byMonth).sort(([,a],[,b])=>b-a)[0];
+                      return (
+                        <Sec title="Időbeli statisztikák">
+                          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                            {avgRounds&&<Badge label="Átl. körszám" val={avgRounds} sub={`${withRounds.length} játékból`} color="#c89030"/>}
+                            {topDay&&<Badge label="Legtöbb játék/nap" val={topDay[1]} sub={topDay[0]} color="#e8b84b"/>}
+                            {topMonth&&<Badge label="Legaktívabb hónap" val={topMonth[1]} sub={topMonth[0]} color="#50c878"/>}
+                          </div>
+                        </Sec>
+                      );
+                    })()}
+
+                    {/* Állandó vesztes szerep + Egytrik póni */}
+                    {(()=>{
+                      // Állandó vesztes: legrosszabb győzési % egy szerepben, min 3 játék
+                      const worstRole = [];
+                      lb.forEach(p=>{
+                        Object.keys(p.roles).forEach(role=>{
+                          const rs={won:0,played:0};
+                          games.forEach(g=>{
+                            const a=g.assignments.find(x=>x.pid===p.id&&x.role===role);
+                            if(!a) return; rs.played++;
+                            if(calcPts(role,g.winTeam,g.pc)>0) rs.won++;
+                          });
+                          if(rs.played>=3) worstRole.push({
+                            name:p.name, role, played:rs.played, won:rs.won,
+                            pct:Math.round(rs.won/rs.played*100)
+                          });
+                        });
+                      });
+                      worstRole.sort((a,b)=>a.pct-b.pct);
+
+                      // Egytrik póni: egy szerepben jó, a többiben gyenge
+                      // "jó" = >50%, "gyenge" = <40%, min 2 játék mindkét kategóriában
+                      const ponies = lb.filter(p=>p.played>=4).map(p=>{
+                        const roleStats = Object.keys(p.roles).map(role=>{
+                          const rs={won:0,played:0};
+                          games.forEach(g=>{
+                            const a=g.assignments.find(x=>x.pid===p.id&&x.role===role);
+                            if(!a) return; rs.played++;
+                            if(calcPts(role,g.winTeam,g.pc)>0) rs.won++;
+                          });
+                          return {role, ...rs, pct: rs.played>0?Math.round(rs.won/rs.played*100):0};
+                        }).filter(r=>r.played>=2);
+                        if(roleStats.length<2) return null;
+                        const good = roleStats.filter(r=>r.pct>=50);
+                        const bad  = roleStats.filter(r=>r.pct<40);
+                        if(good.length===1 && bad.length>=1) return {
+                          name:p.name,
+                          goodRole:good[0],
+                          badRoles:bad
+                        };
+                        return null;
+                      }).filter(Boolean);
+
+                      return (<>
+                        {worstRole.length>0&&(
+                          <Sec title="😬 Állandó vesztes szerep — legrosszabb győzési % (min. 3 játék)">
+                            {worstRole.slice(0,5).map((r,i)=>(
+                              <Row key={i}>
+                                <span style={{color:ROLES[r.role]?.color,minWidth:20}}>{ROLES[r.role]?.icon}</span>
+                                <span style={{color:ROLES[r.role]?.color,fontSize:12,minWidth:75}}>{ROLES[r.role]?.label}</span>
+                                <span style={{color:"#c8a060",flex:1,fontSize:13}}>{r.name}</span>
+                                <span style={{color:"#4a3018",fontSize:11,minWidth:40}}>{r.won}/{r.played}</span>
+                                <Bar won={r.won} played={r.played} color="#e05050"/>
+                              </Row>
+                            ))}
+                          </Sec>
+                        )}
+                        {ponies.length>0&&(
+                          <Sec title="🐴 Egytrik póni — csak egy szerepben erős">
+                            {ponies.map((p,i)=>(
+                              <div key={i} style={{padding:"6px 0",borderBottom:"1px solid #1a1206"}}>
+                                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
+                                  <span style={{color:"#c8a060",fontSize:13,fontWeight:700}}>{p.name}</span>
+                                </div>
+                                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                                  <span style={{fontSize:11,padding:"2px 8px",borderRadius:10,
+                                    background:"#0a2a0a",border:"1px solid #1a5a1a",color:"#50c878"}}>
+                                    ✅ {ROLES[p.goodRole.role]?.icon} {ROLES[p.goodRole.role]?.label} — {p.goodRole.pct}%
+                                  </span>
+                                  {p.badRoles.map((b,j)=>(
+                                    <span key={j} style={{fontSize:11,padding:"2px 8px",borderRadius:10,
+                                      background:"#2a0a0a",border:"1px solid #5a1a1a",color:"#e05050"}}>
+                                      ❌ {ROLES[b.role]?.icon} {ROLES[b.role]?.label} — {b.pct}%
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </Sec>
+                        )}
+                      </>);
+                    })()}
+
+                    {/* Közvetlen párbaj táblázat + Örök rivális */}
+                    {(()=>{
+                      // head-to-head: X és Y egymás elleni csapatain alapul
+                      const h2h={};
+                      games.forEach(g=>{
+                        const winnerPids = g.assignments.filter(a=>ROLES[a.role]?.team===g.winTeam).map(a=>a.pid);
+                        const loserPids  = g.assignments.filter(a=>ROLES[a.role]?.team!==g.winTeam).map(a=>a.pid);
+                        winnerPids.forEach(w=>loserPids.forEach(l=>{
+                          const key=[w,l].sort().join("_");
+                          if(!h2h[key]) h2h[key]={};
+                          // w nyert l ellen ebben a játékban
+                          h2h[key][w] = (h2h[key][w]||0)+1;
+                        }));
+                      });
+
+                      // Örök rivális: kinek van a legtöbb egymás elleni meccse
+                      const rivalries = Object.entries(h2h).map(([key,scores])=>{
+                        const [a,b]=key.split("_");
+                        const aW=scores[a]||0, bW=scores[b]||0;
+                        const total=aW+bW;
+                        return {
+                          a, b, aW, bW, total,
+                          aName:players.find(p=>p.id===a)?.name,
+                          bName:players.find(p=>p.id===b)?.name,
+                        };
+                      }).filter(r=>r.aName&&r.bName&&r.total>=2)
+                        .sort((a,b)=>b.total-a.total);
+
+                      if(!rivalries.length) return null;
+                      return (<>
+                        <Sec title="⚔️ Közvetlen párbaj — egymás elleni arány">
+                          <div style={{color:"#5a3a18",fontSize:11,marginBottom:8}}>
+                            Csak azok a játékok ahol a két játékos ellentétes csapaton volt.
+                          </div>
+                          {rivalries.slice(0,6).map((r,i)=>{
+                            const aDom = r.aW>r.bW, tied=r.aW===r.bW;
+                            return (
+                              <div key={i} style={{padding:"7px 0",borderBottom:"1px solid #1a1206"}}>
+                                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                                  <span style={{color:aDom||tied?"#e8b84b":"#5a4020",flex:1,fontSize:13,fontWeight:aDom?700:400}}>{r.aName}</span>
+                                  <span style={{fontFamily:"'Rye',serif",color:"#e8b84b",fontSize:15}}>{r.aW}</span>
+                                  <span style={{color:"#3a2810",fontSize:12,padding:"0 6px"}}>vs</span>
+                                  <span style={{fontFamily:"'Rye',serif",color:"#e8b84b",fontSize:15}}>{r.bW}</span>
+                                  <span style={{color:(!aDom&&!tied)?"#e8b84b":"#5a4020",flex:1,fontSize:13,fontWeight:(!aDom&&!tied)?700:400,textAlign:"right"}}>{r.bName}</span>
+                                </div>
+                                <div style={{marginTop:4,height:5,background:"#1a1208",borderRadius:3,overflow:"hidden",display:"flex"}}>
+                                  <div style={{width:`${r.total>0?r.aW/r.total*100:50}%`,background:"#e8b84b",transition:"width .4s"}}/>
+                                  <div style={{flex:1,background:"#c07030"}}/>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </Sec>
+
+                        <Sec title="🏆 Örök rivális — legtöbb egymás elleni meccs">
+                          {rivalries.slice(0,3).map((r,i)=>{
+                            const leader = r.aW>r.bW?r.aName:r.bW>r.aW?r.bName:"Döntetlen";
+                            return (
+                              <div key={i} style={{padding:"6px 10px",marginBottom:4,background:"#0e0a05",
+                                borderRadius:6,border:"1px solid #2a1808"}}>
+                                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                                  <span style={{color:"#c8a060",fontSize:13}}>{r.aName} vs {r.bName}</span>
+                                  <span style={{color:"#5a3a18",fontSize:11}}>{r.total} meccs</span>
+                                </div>
+                                <div style={{color:"#50c878",fontSize:12,marginTop:2}}>
+                                  {r.aW===r.bW?"⚖️ Döntetlen":r.aW>r.bW?`🏅 ${r.aName} vezet ${r.aW}–${r.bW}`:`🏅 ${r.bName} vezet ${r.bW}–${r.aW}`}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </Sec>
+                      </>);
+                    })()}
+
+                    {/* Seriff-Bandita kombináció */}
+                    {(()=>{
+                      const combos={};
+                      games.forEach(g=>{
+                        const sA = g.assignments.find(a=>a.role==="seriff");
+                        const bAs = g.assignments.filter(a=>a.role==="bandita");
+                        if(!sA||bAs.length===0) return;
+                        const sName = players.find(p=>p.id===sA.pid)?.name;
+                        if(!sName) return;
+                        bAs.forEach(b=>{
+                          const bName=players.find(p=>p.id===b.pid)?.name; if(!bName) return;
+                          const key=`${sName}|${bName}`;
+                          if(!combos[key]) combos[key]={seriff:sName,bandita:bName,p:0,seriffWin:0,banditaWin:0};
+                          combos[key].p++;
+                          if(g.winTeam==="seriff") combos[key].seriffWin++;
+                          if(g.winTeam==="bandita") combos[key].banditaWin++;
+                        });
+                      });
+                      const top = Object.values(combos).filter(c=>c.p>=2).sort((a,b)=>b.p-a.p).slice(0,5);
+                      if(!top.length) return null;
+                      return (
+                        <Sec title="🤠💀 Seriff–Bandita kombináció — ki harcol legtöbbször egymás ellen?">
+                          {top.map((c,i)=>(
+                            <div key={i} style={{padding:"7px 0",borderBottom:"1px solid #1a1206"}}>
+                              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                                <span style={{color:"#e8b84b",fontSize:12}}>🤠 {c.seriff}</span>
+                                <span style={{color:"#3a2810",fontSize:11}}>vs</span>
+                                <span style={{color:"#e05050",fontSize:12}}>💀 {c.bandita}</span>
+                                <span style={{color:"#3a2810",fontSize:11,marginLeft:"auto"}}>{c.p}×</span>
+                              </div>
+                              <div style={{display:"flex",gap:6}}>
+                                <span style={{fontSize:11,padding:"2px 8px",borderRadius:10,
+                                  background:"#1e1608",border:"1px solid #4a3a10",color:"#e8b84b"}}>
+                                  🤠 Seriff nyert: {c.seriffWin}×
+                                </span>
+                                <span style={{fontSize:11,padding:"2px 8px",borderRadius:10,
+                                  background:"#1e0808",border:"1px solid #5a1a1a",color:"#e05050"}}>
+                                  💀 Bandita nyert: {c.banditaWin}×
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </Sec>
+                      );
+                    })()}
+
+                    {/* Tökéletes sorozat + Grand Slam */}
+                    {(()=>{
+                      // Tökéletes sorozat: valaha ért el 3+ nyerő sorozatot
+                      const perfStreaks = lb.map(p=>{
+                        let best=0, cur=0;
+                        [...p.scoreHistory].forEach(h=>{
+                          if(h.pts>0) { cur++; best=Math.max(best,cur); }
+                          else cur=0;
+                        });
+                        return {name:p.name, best};
+                      }).filter(p=>p.best>=3).sort((a,b)=>b.best-a.best);
+
+                      // Grand Slam: nyert-e mindhárom csapatszínnel
+                      const grandSlam = lb.map(p=>{
+                        const wonTeams = new Set();
+                        games.forEach(g=>{
+                          const a=g.assignments.find(x=>x.pid===p.id);
+                          if(a && calcPts(a.role,g.winTeam,g.pc)>0) wonTeams.add(g.winTeam);
+                        });
+                        return {name:p.name, wonTeams: [...wonTeams], complete: wonTeams.size===3};
+                      });
+                      const slammers = grandSlam.filter(p=>p.complete);
+                      const inProgress = grandSlam.filter(p=>!p.complete&&p.wonTeams.length>=1);
+
+                      return (<>
+                        {perfStreaks.length>0&&(
+                          <Sec title="🔥 Tökéletes sorozat — valaha elért 3+ nyerő sorozat">
+                            {perfStreaks.map((p,i)=>(
+                              <div key={i} style={{display:"flex",alignItems:"center",gap:8,
+                                padding:"5px 0",borderBottom:"1px solid #1a1206"}}>
+                                <span style={{color:"#c8a060",flex:1,fontSize:13}}>{p.name}</span>
+                                <span style={{fontFamily:"'Rye',serif",color:"#e8b84b",fontSize:18}}>{p.best}🔥</span>
+                                <span style={{color:"#5a3a18",fontSize:11}}>legjobb sorozat</span>
+                              </div>
+                            ))}
+                          </Sec>
+                        )}
+                        <Sec title="🏆 Grand Slam — nyert mindhárom csapatszínnel?">
+                          {slammers.length>0&&(
+                            <div style={{marginBottom:10}}>
+                              <div style={{color:"#50c878",fontSize:12,marginBottom:6}}>✅ Teljesítette:</div>
+                              {slammers.map((p,i)=>(
+                                <div key={i} style={{display:"flex",alignItems:"center",gap:6,
+                                  padding:"4px 0",borderBottom:"1px solid #0a2a0a"}}>
+                                  <span style={{color:"#50c878",fontSize:16}}>🏆</span>
+                                  <span style={{color:"#80d080",fontSize:13,fontWeight:700}}>{p.name}</span>
+                                  <div style={{marginLeft:"auto",display:"flex",gap:4}}>
+                                    {["seriff","bandita","renegat"].map(t=>(
+                                      <span key={t} style={{fontSize:16}}>{WIN_TEAMS[t].icon}</span>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {slammers.length===0&&<div style={{color:"#3a2810",fontSize:12,marginBottom:8}}>Még senki sem teljesítette.</div>}
+                          {inProgress.length>0&&(
+                            <div>
+                              <div style={{color:"#7a5a28",fontSize:12,marginBottom:6}}>⏳ Folyamatban:</div>
+                              {inProgress.map((p,i)=>(
+                                <div key={i} style={{display:"flex",alignItems:"center",gap:6,
+                                  padding:"4px 0",borderBottom:"1px solid #1a1206"}}>
+                                  <span style={{color:"#c8a060",fontSize:13}}>{p.name}</span>
+                                  <div style={{marginLeft:"auto",display:"flex",gap:4}}>
+                                    {["seriff","bandita","renegat"].map(t=>(
+                                      <span key={t} style={{fontSize:16,opacity:p.wonTeams.includes(t)?1:0.2}}>
+                                        {WIN_TEAMS[t].icon}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </Sec>
+                      </>);
+                    })()}
+
+                    {/* Visszavágó arány */}
+                    {(()=>{
+                      // Minden játékosnál: az előző játékban veszített → következőben nyert-e?
+                      const comebacks = lb.filter(p=>p.played>=3).map(p=>{
+                        const myGames = [...games].reverse().filter(g=>
+                          g.assignments.some(a=>a.pid===p.id)
+                        );
+                        let chances=0, wins=0;
+                        for(let i=0;i<myGames.length-1;i++){
+                          const prev = myGames[i];
+                          const next = myGames[i+1];
+                          const prevA = prev.assignments.find(a=>a.pid===p.id);
+                          if(!prevA) continue;
+                          const prevWon = calcPts(prevA.role,prev.winTeam,prev.pc)>0;
+                          if(!prevWon){
+                            chances++;
+                            const nextA = next.assignments.find(a=>a.pid===p.id);
+                            if(nextA && calcPts(nextA.role,next.winTeam,next.pc)>0) wins++;
+                          }
+                        }
+                        if(chances<2) return null;
+                        return {name:p.name, wins, chances, pct:Math.round(wins/chances*100)};
+                      }).filter(Boolean).sort((a,b)=>b.pct-a.pct);
+
+                      if(!comebacks.length) return null;
+                      return (
+                        <Sec title="🥊 Visszavágó arány — vereség után a következő játékban nyer-e?">
+                          <div style={{color:"#5a3a18",fontSize:11,marginBottom:8}}>
+                            Csak olyan játékok ahol az előző játékot elveszítette.
+                          </div>
+                          {comebacks.map((c,i)=>(
+                            <Row key={i}>
+                              <span style={{color:"#c8a060",flex:1,fontSize:13}}>{c.name}</span>
+                              <span style={{color:"#4a3018",fontSize:11,minWidth:42}}>{c.wins}/{c.chances}</span>
+                              <Bar won={c.wins} played={c.chances} color={c.pct>=50?"#50c878":"#e05050"}/>
+                            </Row>
+                          ))}
+                        </Sec>
+                      );
+                    })()}
+
+                    {/* Ki billenti fel az egyensúlyt */}
+                    {(()=>{
+                      if(games.length<4) return null;
+                      // Minden játékosnál: azokban a játékokban ahol ő játszik,
+                      // melyik csapatszín nyer szignifikánsan többet vs az összes játékban
+                      const total = games.length;
+                      const globalTw = {seriff:0,bandita:0,renegat:0};
+                      games.forEach(g=>{ globalTw[g.winTeam]=(globalTw[g.winTeam]||0)+1; });
+
+                      const tilters = lb.filter(p=>p.played>=3).map(p=>{
+                        const myGames = games.filter(g=>g.assignments.some(a=>a.pid===p.id));
+                        const myTw = {seriff:0,bandita:0,renegat:0};
+                        myGames.forEach(g=>{ myTw[g.winTeam]=(myTw[g.winTeam]||0)+1; });
+                        const n = myGames.length;
+
+                        // Melyik csapatnál a legnagyobb az eltérés a globálishoz képest?
+                        let maxDiff=0, tiltTeam=null;
+                        Object.entries(myTw).forEach(([team,cnt])=>{
+                          const myPct   = cnt/n;
+                          const allPct  = (globalTw[team]||0)/total;
+                          const diff    = myPct - allPct;
+                          if(Math.abs(diff)>Math.abs(maxDiff)){
+                            maxDiff=diff; tiltTeam=team;
+                          }
+                        });
+                        if(!tiltTeam || Math.abs(maxDiff)<0.12) return null;
+                        const myPct  = Math.round((myTw[tiltTeam]||0)/n*100);
+                        const allPct = Math.round((globalTw[tiltTeam]||0)/total*100);
+                        return {name:p.name, team:tiltTeam, myPct, allPct, diff:Math.round(maxDiff*100), played:n};
+                      }).filter(Boolean).sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff));
+
+                      if(!tilters.length) return null;
+                      return (
+                        <Sec title="⚖️ Ki billenti fel az egyensúlyt?">
+                          <div style={{color:"#5a3a18",fontSize:11,marginBottom:8}}>
+                            Ha ez a játékos játszik, az adott csapat szignifikánsan többet nyer a globális átlaghoz képest.
+                          </div>
+                          {tilters.slice(0,5).map((t,i)=>(
+                            <div key={i} style={{display:"flex",alignItems:"center",gap:8,
+                              padding:"6px 0",borderBottom:"1px solid #1a1206"}}>
+                              <span style={{color:"#c8a060",flex:1,fontSize:13}}>{t.name}</span>
+                              <span style={{color:WIN_TEAMS[t.team].color,fontSize:12}}>
+                                {WIN_TEAMS[t.team].icon} {WIN_TEAMS[t.team].label}
+                              </span>
+                              <span style={{fontSize:12,color:t.diff>0?"#50c878":"#e05050",
+                                fontFamily:"'Rye',serif",minWidth:60,textAlign:"right"}}>
+                                {t.myPct}% vs {t.allPct}%
+                              </span>
+                            </div>
+                          ))}
+                        </Sec>
+                      );
+                    })()}
+
+                    {/* Legkiegyensúlyozottabb nap */}
+                    {(()=>{
+                      // Napok ahol legalább 3 játék volt, és a legtöbb különböző csapat nyert
+                      const byDay = {};
+                      games.forEach(g=>{
+                        if(!byDay[g.date]) byDay[g.date]={games:0,teams:{}};
+                        byDay[g.date].games++;
+                        byDay[g.date].teams[g.winTeam]=(byDay[g.date].teams[g.winTeam]||0)+1;
+                      });
+                      const days = Object.entries(byDay)
+                        .filter(([,v])=>v.games>=3)
+                        .map(([date,v])=>{
+                          const teamCounts = Object.values(v.teams);
+                          const uniqueTeams = Object.keys(v.teams).length;
+                          // Egyensúly = minél több különböző győztes, minél kisebb a szórás
+                          const max = Math.max(...teamCounts);
+                          const balance = uniqueTeams*10 - max; // magasabb = egyensúlyosabb
+                          return {date, games:v.games, uniqueTeams, teams:v.teams, balance};
+                        })
+                        .sort((a,b)=>b.balance-a.balance);
+
+                      if(!days.length) return null;
+                      const best = days[0];
+                      return (
+                        <Sec title="🎯 Legkiegyensúlyozottabb nap — legtöbb különböző győztes csapat">
+                          <div style={{padding:"10px 12px",background:"#0e0a05",borderRadius:6,
+                            border:"1px solid #2a1808"}}>
+                            <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+                              <span style={{color:"#e8b84b",fontFamily:"'Rye',serif",fontSize:16}}>{best.date}</span>
+                              <span style={{color:"#5a3a18",fontSize:12}}>{best.games} játék</span>
+                            </div>
+                            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                              {Object.entries(best.teams).map(([team,cnt])=>(
+                                <span key={team} style={{padding:"3px 10px",borderRadius:20,fontSize:12,
+                                  background:WIN_TEAMS[team].color+"22",
+                                  border:`1px solid ${WIN_TEAMS[team].color}55`,
+                                  color:WIN_TEAMS[team].color}}>
+                                  {WIN_TEAMS[team].icon} {WIN_TEAMS[team].label}: {cnt}×
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          {days.length>1&&(
+                            <div style={{marginTop:8,color:"#3a2810",fontSize:11}}>
+                              Többi kiegyensúlyozott nap: {days.slice(1,3).map(d=>d.date).join(", ")}
+                            </div>
+                          )}
+                        </Sec>
+                      );
+                    })()}
+
+                    {/* Ki nyerte meg a legtöbb játékot seriffként */}
+                    {(()=>{
+                      const seriffWins = {};
+                      games.forEach(g=>{
+                        if(g.winTeam!=="seriff") return;
+                        const sA = g.assignments.find(a=>a.role==="seriff");
+                        if(!sA) return;
+                        const name = players.find(p=>p.id===sA.pid)?.name;
+                        if(!name) return;
+                        seriffWins[name] = (seriffWins[name]||0)+1;
+                      });
+                      const rows = Object.entries(seriffWins).sort(([,a],[,b])=>b-a);
+                      if(!rows.length) return null;
+                      const max = rows[0][1];
+                      return (
+                        <Sec title="🤠 Legtöbb seriff győzelem — ki nyerte meg a legtöbb játékot seriffként?">
+                          {rows.map(([name,cnt],i)=>(
+                            <div key={i} style={{display:"flex",alignItems:"center",gap:10,
+                              padding:"6px 0",borderBottom:"1px solid #1a1206"}}>
+                              {i===0&&<span style={{fontSize:18}}>🥇</span>}
+                              {i===1&&<span style={{fontSize:18}}>🥈</span>}
+                              {i===2&&<span style={{fontSize:18}}>🥉</span>}
+                              {i>2&&<span style={{width:22,textAlign:"center",color:"#3a2010",
+                                fontSize:12,fontFamily:"'Rye',serif"}}>#{i+1}</span>}
+                              <span style={{color:"#c8a060",flex:1,fontSize:13}}>{name}</span>
+                              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                                {Array.from({length:cnt}).map((_,j)=>(
+                                  <span key={j} style={{fontSize:14}}>⭐</span>
+                                ))}
+                                <span style={{fontFamily:"'Rye',serif",color:"#e8b84b",
+                                  fontSize:18,marginLeft:4}}>{cnt}×</span>
+                              </div>
+                            </div>
+                          ))}
+                        </Sec>
+                      );
+                    })()}
+
+                  </div>
+                );
+              })()}
+            </>}
+          </div>
+        )}
+
+        {/* ══ ÚJ JÁTÉK ══ */}
+        {view==="new"&&(
+          <div className="fu">
+            <h2 style={S.sh}>Új Játék Rögzítése</h2>
+            {players.length<5
+              ? <Empty>Legalább 5 játékos szükséges.</Empty>
+              : <>
+                <div style={{display:"flex",gap:14,flexWrap:"wrap",marginBottom:17}}>
+                  <div>
+                    <div style={S.label}>Hányan játszottak?</div>
+                    <div style={{display:"flex",gap:8,marginTop:6}}>
+                      {[5,6].filter(n=>players.length>=n).map(n=>(
+                        <button key={n} className="btn" onClick={()=>{setPc(n);setAssign({});}}
+                          style={{padding:"7px 20px",background:pc===n?"#2a1a08":"#1a1008",
+                            color:pc===n?"#e8b84b":"#6a4a20",
+                            border:`1px solid ${pc===n?"#7a5020":"#3a2010"}`,borderRadius:4,fontSize:15}}>
+                          {n} fős
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={S.label}>Dátum</div>
+                    <input type="date" value={date} onChange={e=>setDate(e.target.value)}
+                      style={{background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
+                        borderRadius:4,padding:"7px 11px",fontSize:14,marginTop:6}}/>
+                  </div>
+                  <div>
+                    <div style={S.label}>Körök száma (opcionális)</div>
+                    <input type="number" min="1" max="99" placeholder="pl. 12"
+                      value={rounds} onChange={e=>setRounds(e.target.value)}
+                      style={{background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
+                        borderRadius:4,padding:"7px 11px",fontSize:14,marginTop:6,width:90}}/>
+                  </div>
+                </div>
+                <div style={S.label}>Szerepek kiosztása</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(182px,1fr))",gap:9,marginTop:7}}>
+                  {slots.map((role,i)=>{
+                    const r=ROLES[role]; const pts=Math.round(r.base*cfg.mult*10)/10;
+                    return (
+                      <div key={i} style={{padding:"11px 12px",borderRadius:6,
+                        border:`1px solid ${r.color}44`,background:r.dark}}>
+                        <div style={{display:"flex",justifyContent:"space-between",color:r.color,
+                          fontSize:14,fontWeight:700,marginBottom:7}}>
+                          <span>{r.icon} {r.label}</span>
+                          <span style={{opacity:.7,fontSize:12}}>+{pts} pt</span>
+                        </div>
+                        <select value={assign[i]||""} onChange={e=>setAssign(p=>({...p,[i]:e.target.value}))}
+                          style={{width:"100%",background:"#100c06",color:"#c8a060",
+                            border:`1px solid ${assign[i]?r.color+"55":"#2a1808"}`,
+                            borderRadius:4,padding:"6px 9px",fontSize:14}}>
+                          <option value="">— válassz —</option>
+                          {players.map(p=>{
+                            const taken=Object.entries(assign).some(([k,v])=>parseInt(k)!==i&&v===p.id);
+                            return <option key={p.id} value={p.id} disabled={taken}>{taken?"✗ ":""}{p.name}</option>;
+                          })}
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{marginTop:17}}>
+                  <div style={S.label}>Ki nyert?</div>
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:7}}>
+                    {Object.entries(WIN_TEAMS).map(([k,wt])=>(
+                      <button key={k} className="btn" onClick={()=>setWinner(k)}
+                        style={{padding:"8px 15px",background:winner===k?wt.color+"22":"#1a1008",
+                          color:winner===k?wt.color:"#6a4a20",
+                          border:`1px solid ${winner===k?wt.color:wt.color+"44"}`,
+                          borderRadius:4,fontSize:14,transition:"all .15s"}}>
+                        {wt.icon} {wt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {allOk&&(
+                  <div className="fu" style={{marginTop:15,padding:13,border:"1px solid #3a2808",
+                    borderRadius:6,background:"#0e0a05"}}>
+                    <div style={{fontFamily:"'Rye',serif",color:"#6a4a18",fontSize:11,
+                      letterSpacing:2,textAlign:"center",marginBottom:9}}>✦ PONTOK ELŐNÉZETE ✦</div>
+                    {slots.map((role,i)=>{
+                      const player=players.find(x=>x.id===assign[i]);
+                      const pts=calcPts(role,winner,pc);
+                      return (
+                        <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",
+                          borderBottom:"1px solid #1e1206",fontSize:13}}>
+                          <span style={{color:ROLES[role].color,minWidth:93}}>{ROLES[role].icon} {ROLES[role].label}</span>
+                          <span style={{color:"#c8a060",flex:1}}>{player?.name}</span>
+                          <span style={{fontFamily:"'Rye',serif",fontSize:16,
+                            color:pts>0?"#50c878":"#5a3030"}}>{pts>0?`+${pts}`:"–"}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <button className="btn" onClick={doGameSave} disabled={!allOk}
+                  style={{marginTop:18,width:"100%",padding:"12px",
+                    background:"linear-gradient(180deg,#3a2208,#231504)",
+                    color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,
+                    fontFamily:"'Rye',serif",fontSize:16,letterSpacing:2,
+                    boxShadow:"0 4px 18px #00000055",opacity:allOk?1:.4}}>
+                  💾 &nbsp;Játék Mentése
+                </button>
+              </>
+            }
+          </div>
+        )}
+
+        {/* ══ JÁTÉKOSOK ══ */}
+        {view==="pl"&&(
+          <div className="fu">
+            <h2 style={S.sh}>Játékosok</h2>
+            <div style={{display:"flex",gap:9,marginBottom:15}}>
+              <input value={newName} onChange={e=>setNewName(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&addPlayer()}
+                placeholder="Játékos neve..."
+                style={{flex:1,background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
+                  borderRadius:4,padding:"8px 12px",fontSize:15}}/>
+              <button className="btn" onClick={addPlayer}
+                style={{background:"#2a1a08",color:"#e8b84b",border:"1px solid #5a3a10",
+                  borderRadius:4,padding:"8px 15px",fontSize:14}}>+ Hozzáad</button>
+            </div>
+            {players.length===0?<Empty>Még nincsenek játékosok.</Empty>
+              :players.map((p,i)=>{
+                const st=lb.find(x=>x.id===p.id);
+                return (
+                  <div key={p.id} className="hov sr"
+                    style={{display:"flex",alignItems:"center",gap:10,padding:"10px 13px",
+                      borderRadius:6,background:"#100c06",marginBottom:4,
+                      borderLeft:"3px solid #2a1808",animationDelay:`${i*.04}s`}}>
+                    <span style={{fontSize:16,color:"#d0a860",flex:1}}>{p.name}</span>
+                    {st&&st.played>0&&<span style={{fontSize:12,color:"#4a3018"}}>{st.pts.toFixed(1)} pt · {st.played} J</span>}
+                    <button className="btn" onClick={()=>delPlayer(p.id)}
+                      style={{background:"#2a0a0a",color:"#c05050",border:"1px solid #5a1a1a",
+                        borderRadius:4,padding:"3px 9px",fontSize:12}}>✕</button>
+                  </div>
+                );
+              })
+            }
+          </div>
+        )}
+
+        {/* ══ ELŐZMÉNYEK ══ */}
+        {view==="hist"&&(
+          <div className="fu">
+            <h2 style={S.sh}>Előzmények</h2>
+            {games.length===0?<Empty>Még nincsenek mentett játékok.</Empty>
+              :games.map((g,gi)=>{
+                const wt=WIN_TEAMS[g.winTeam];
+                return (
+                  <div key={g.id} className="sr"
+                    style={{padding:"12px 13px",borderRadius:6,background:"#100c06",marginBottom:6,
+                      borderLeft:`3px solid ${wt.color}55`,animationDelay:`${gi*.05}s`}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
+                      flexWrap:"wrap",gap:6,marginBottom:8}}>
+                      <span style={{color:"#5a3a18",fontSize:12}}>{g.date} · {g.pc} fős</span>
+                      <span style={{color:wt.color,fontWeight:700,fontSize:13}}>{wt.icon} {wt.label} nyert</span>
+                      <button className="btn" onClick={()=>delGame(g.id)}
+                        style={{background:"#2a0a0a",color:"#c05050",border:"1px solid #5a1a1a",
+                          borderRadius:4,padding:"2px 7px",fontSize:11}}>✕ töröl</button>
+                    </div>
+                    {g.assignments.map((a,ai)=>{
+                      const player=players.find(x=>x.id===a.pid);
+                      const r=ROLES[a.role]; const pts=calcPts(a.role,g.winTeam,g.pc);
+                      return (
+                        <div key={ai} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,
+                          padding:"4px 0",borderBottom:"1px solid #1a1206"}}>
+                          <span style={{color:r.color,minWidth:88}}>{r.icon} {r.label}</span>
+                          <span style={{color:"#c0a060",flex:1}}>{player?.name||"?"}</span>
+                          <span style={{fontFamily:"'Rye',serif",color:pts>0?"#50c878":"#5a3030",
+                            fontSize:13}}>{pts>0?`+${pts}`:"–"}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })
+            }
+          </div>
+        )}
+
+      </main>
+    </div>
+  );
+}
+
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0c0905} ::-webkit-scrollbar-thumb{background:#4a2e10;border-radius:2px}
+  input,select,button,textarea{font-family:'Playfair Display',Georgia,serif}
+  select option{background:#1a1008;color:#c8a060}
+  .btn{transition:all .15s;cursor:pointer;border:none}
+  .btn:hover:not(:disabled){filter:brightness(1.2);transform:translateY(-1px)}
+  .btn:active:not(:disabled){transform:translateY(0)}
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .hov:hover{background:rgba(232,184,75,.06)!important}
+  @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes sr{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  .fu{animation:fu .25s ease both}
+  .sr{animation:sr .22s ease both}
+  .nb{position:relative}
+  .nb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#e8b84b;transform:scaleX(0);transition:transform .2s}
+  .nb.on::after{transform:scaleX(1)}
+`;
+
+const S = {
+  root:   { minHeight:"100vh", background:"radial-gradient(ellipse at 50% 0%,#1a0e04 0%,#0c0905 55%,#080906 100%)", fontFamily:"'Playfair Display',Georgia,serif", color:"#c8a060" },
+  hdr:    { textAlign:"center", padding:"22px 14px 14px", borderBottom:"1px solid #2a1808", background:"linear-gradient(180deg,#1e1006 0%,transparent 100%)" },
+  deco:   { color:"#3a2410", fontSize:11, letterSpacing:7, marginBottom:3 },
+  title:  { fontFamily:"'Rye',serif", fontSize:"clamp(50px,13vw,90px)", color:"#e8b84b", letterSpacing:8, lineHeight:1, textShadow:"0 0 50px #e8b84b2a,0 2px 0 #000", margin:"5px 0 3px" },
+  sub:    { color:"#5a3a18", fontSize:"clamp(9px,2.2vw,12px)", letterSpacing:"clamp(4px,1.5vw,7px)" },
+  nav:    { display:"flex", flexWrap:"wrap", justifyContent:"center", gap:1, padding:"0 5px", background:"#0e0a05", borderBottom:"1px solid #2a1808" },
+  navBtn: { background:"transparent", fontSize:"clamp(11px,2.4vw,13px)", padding:"10px clamp(6px,2vw,14px)", letterSpacing:.5, cursor:"pointer", transition:"color .15s", fontFamily:"'Playfair Display',serif" },
+  main:   { maxWidth:700, margin:"0 auto", padding:"22px 13px 54px" },
+  sh:     { fontFamily:"'Rye',serif", color:"#c89030", fontSize:18, letterSpacing:2, marginBottom:17, paddingBottom:9, borderBottom:"1px solid #2a1808" },
+  label:  { color:"#6a4a20", fontSize:11, letterSpacing:2, textTransform:"uppercase" },
+};
+
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+// ── ROOT KOMPONENS ────────────────────────────────────────────────────────────
+function Root() {
+  const [apiKey,   setApiKey]   = useState(localStorage.getItem(LS_KEY)||"");
+  const [roomId,   setRoomId]   = useState(localStorage.getItem(LS_ROOM)||"");
+  const [roomName, setRoomName] = useState(localStorage.getItem(LS_RNAME)||"");
+  const [initData, setInitData] = useState(null);
+
+  const handleApiKey = (key) => setApiKey(key);
+
+  const handleJoin = (id, name, players, games) => {
+    setRoomId(id); setRoomName(name);
+    setInitData({players, games});
+  };
+
+  if(!apiKey) return <SetupScreen onDone={handleApiKey}/>;
+  if(!roomId) return <RoomScreen apiKey={apiKey} onJoin={handleJoin}/>;
+
+  return <App
+    apiKey={apiKey}
+    roomId={roomId}
+    roomName={roomName}
+    initPlayers={initData?.players}
+    initGames={initData?.games}
+    onLeaveRoom={()=>{
+      localStorage.removeItem(LS_ROOM);
+      localStorage.removeItem(LS_RNAME);
+      setRoomId(""); setRoomName(""); setInitData(null);
+    }}
+  />;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Root/>);
+  </script>
+</body>
+</html>
