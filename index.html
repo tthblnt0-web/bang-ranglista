@@ -45,6 +45,7 @@ const { useState, useEffect, useCallback } = React;
 const LS_KEY    = "bang_apikey";
 const LS_ROOM   = "bang_roomid";
 const LS_RNAME  = "bang_roomname";
+const HARDCODED_KEY = "$2a$10$ZDenCcJ13BdgbQWFeu0j8.rlKpq2v0eKQ6i4AeaqTKloihDsCNtNS";
 
 const jbHdrs = key => ({ "Content-Type":"application/json", "X-Master-Key":key });
 
@@ -1858,19 +1859,16 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
 // ── ROOT KOMPONENS ────────────────────────────────────────────────────────────
 function Root() {
-  const [apiKey,   setApiKey]   = useState(localStorage.getItem(LS_KEY)||"");
+  const apiKey = HARDCODED_KEY;
   const [roomId,   setRoomId]   = useState(localStorage.getItem(LS_ROOM)||"");
   const [roomName, setRoomName] = useState(localStorage.getItem(LS_RNAME)||"");
   const [initData, setInitData] = useState(null);
-
-  const handleApiKey = (key) => setApiKey(key);
 
   const handleJoin = (id, name, players, games) => {
     setRoomId(id); setRoomName(name);
     setInitData({players, games});
   };
 
-  if(!apiKey) return <SetupScreen onDone={handleApiKey}/>;
   if(!roomId) return <RoomScreen apiKey={apiKey} onJoin={handleJoin}/>;
 
   return <App
