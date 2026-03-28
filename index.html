@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
-    ,::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{background:#0c0905;}
     ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0c0905} ::-webkit-scrollbar-thumb{background:#4a2e10;border-radius:2px}
     input,select,button,textarea{font-family:'Playfair Display',Georgia,serif}
@@ -51,7 +51,7 @@ const HARDCODED_KEY = “$2a$10$ZDenCcJ13BdgbQWFeu0j8.rlKpq2v0eKQ6i4AeaqTKloihDs
 const jbHdrs = key => ({ “Content-Type”:“application/json”, “X-Master-Key”:key });
 
 async function jbRead(binId, apiKey) {
-const r = await fetch(https://api.jsonbin.io/v3/b/${binId}/latest, {
+const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
 headers:{“X-Master-Key”:apiKey}
 });
 if(!r.ok) throw new Error(r.status);
@@ -59,7 +59,7 @@ return (await r.json()).record;
 }
 
 async function jbWrite(binId, apiKey, data) {
-const r = await fetch(https://api.jsonbin.io/v3/b/${binId}, {
+const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
 method:“PUT”, headers:jbHdrs(apiKey), body:JSON.stringify(data)
 });
 if(!r.ok) throw new Error(r.status);
@@ -100,6 +100,7 @@ textShadow:“0 0 50px #e8b84b2a,0 2px 0 #000”,lineHeight:1}}>BANG!</h1>
 <p style={{color:”#5a3a18”,fontSize:12,letterSpacing:6,marginTop:4}}>HÁZI RANGLISTA</p>
 </div>
 
+```
     <div style={{padding:24,border:"1px solid #3a2010",borderRadius:10,background:"#100c06"}}>
       <div style={{color:"#c89030",fontWeight:700,fontSize:16,marginBottom:6}}>🔑 JSONBin API kulcs</div>
       <div style={{color:"#5a3a18",fontSize:13,lineHeight:1.8,marginBottom:16}}>
@@ -129,6 +130,7 @@ textShadow:“0 0 50px #e8b84b2a,0 2px 0 #000”,lineHeight:1}}>BANG!</h1>
     </div>
   </div>
 </div>
+```
 
 );
 }
@@ -191,6 +193,7 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1}}>BANG!</h1>
 <p style={{color:”#5a3a18”,fontSize:11,letterSpacing:5,marginTop:3}}>HÁZI RANGLISTA</p>
 </div>
 
+```
     {!mode && !created && (
       <div style={{display:"flex",flexDirection:"column",gap:12}}>
         <button className="btn" onClick={()=>setMode("create")}
@@ -285,6 +288,7 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1}}>BANG!</h1>
     )}
   </div>
 </div>
+```
 
 );
 }
@@ -488,7 +492,7 @@ const addPlayer = () => {
 const name = newName.trim(); if (!name) return;
 if (players.find(p=>p.name.toLowerCase()===name.toLowerCase())) { notify(“Már létezik!”,true); return; }
 update([…players,{id:Date.now().toString(),name}], games);
-setNewName(””); notify(${name} hozzáadva ✓);
+setNewName(””); notify(`${name} hozzáadva ✓`);
 };
 const delPlayer = id => update(players.filter(p=>p.id!==id), games);
 
@@ -537,6 +541,7 @@ return (
 <div style={S.root}>
 <style>{CSS}</style>
 
+```
   {toast&&(
     <div style={{position:"fixed",top:14,left:"50%",transform:"translateX(-50%)",
       background:toast.err?"#250808":"#081a08",border:`1px solid ${toast.err?"#8b2020":"#1a6a1a"}`,
@@ -1969,11 +1974,12 @@ return (
 
   </main>
 </div>
+```
 
 );
 }
 
-const CSS = @import url('https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&display=swap'); *,*::before,*::after{box-sizing:border-box;margin:0;padding:0} ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0c0905} ::-webkit-scrollbar-thumb{background:#4a2e10;border-radius:2px} input,select,button,textarea{font-family:'Playfair Display',Georgia,serif} select option{background:#1a1008;color:#c8a060} .btn{transition:all .15s;cursor:pointer;border:none} .btn:hover:not(:disabled){filter:brightness(1.2);transform:translateY(-1px)} .btn:active:not(:disabled){transform:translateY(0)} .btn:disabled{opacity:.35;cursor:not-allowed} .hov:hover{background:rgba(232,184,75,.06)!important} @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} @keyframes sr{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}} @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}} .fu{animation:fu .25s ease both} .sr{animation:sr .22s ease both} .nb{position:relative} .nb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#e8b84b;transform:scaleX(0);transition:transform .2s} .nb.on::after{transform:scaleX(1)};
+const CSS = `@import url('https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&display=swap'); *,*::before,*::after{box-sizing:border-box;margin:0;padding:0} ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0c0905} ::-webkit-scrollbar-thumb{background:#4a2e10;border-radius:2px} input,select,button,textarea{font-family:'Playfair Display',Georgia,serif} select option{background:#1a1008;color:#c8a060} .btn{transition:all .15s;cursor:pointer;border:none} .btn:hover:not(:disabled){filter:brightness(1.2);transform:translateY(-1px)} .btn:active:not(:disabled){transform:translateY(0)} .btn:disabled{opacity:.35;cursor:not-allowed} .hov:hover{background:rgba(232,184,75,.06)!important} @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} @keyframes sr{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}} @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}} .fu{animation:fu .25s ease both} .sr{animation:sr .22s ease both} .nb{position:relative} .nb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#e8b84b;transform:scaleX(0);transition:transform .2s} .nb.on::after{transform:scaleX(1)}`;
 
 const S = {
 root:   { minHeight:“100vh”, background:“radial-gradient(ellipse at 50% 0%,#1a0e04 0%,#0c0905 55%,#080906 100%)”, fontFamily:”‘Playfair Display’,Georgia,serif”, color:”#c8a060” },
@@ -1987,8 +1993,6 @@ main:   { maxWidth:700, margin:“0 auto”, padding:“22px 13px 54px” },
 sh:     { fontFamily:”‘Rye’,serif”, color:”#c89030”, fontSize:18, letterSpacing:2, marginBottom:17, paddingBottom:9, borderBottom:“1px solid #2a1808” },
 label:  { color:”#6a4a20”, fontSize:11, letterSpacing:2, textTransform:“uppercase” },
 };
-
-ReactDOM.createRoot(document.getElementById(“root”)).render(<App />);
 
 // ── ROOT KOMPONENS ────────────────────────────────────────────────────────────
 function Root() {
