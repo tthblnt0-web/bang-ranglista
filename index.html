@@ -81,7 +81,7 @@ async function jbRead(binId, apiKey) {
 const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
 headers:{“X-Master-Key”:apiKey}
 });
-if(!r.ok) throw new Error(r.status);
+if(!r.ok) { const txt = await r.text().catch(()=>’’); throw new Error(r.status + ’ ’ + txt.slice(0,100)); }
 return (await r.json()).record;
 }
 
@@ -189,12 +189,12 @@ if(!key){setErr(“Add meg a szoba kulcsát!”); return;}
 setLoading(true); setErr(””);
 try {
 const d = await jbRead(key, apiKey);
-if(!d||!Array.isArray(d.players)) throw new Error(“Érvénytelen szoba”);
+if(!d||!Array.isArray(d.players)) throw new Error(“Érvénytelen szoba (adat)”);
 localStorage.setItem(LS_ROOM, key);
 localStorage.setItem(LS_RNAME, “Szoba”);
 onJoin(key, “Szoba”, d.players, d.games);
 } catch(e) {
-setErr(“Nem található ez a szoba. Ellenőrizd a kulcsot!”);
+setErr(“Hiba: “ + e.message);
 }
 setLoading(false);
 };
