@@ -60,12 +60,10 @@
       return false;
     };
   </script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
   <script>
-const { useState, useEffect, useCallback } = React;
-
-function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === ‘optionalAccess’ || op === ‘optionalCall’) && value == null) { return undefined; } if (op === ‘access’ || op === ‘optionalAccess’) { lastAccessLHS = value; value = fn(value); } else if (op === ‘call’ || op === ‘optionalCall’) { value = fn((…args) => value.call(lastAccessLHS, …args)); lastAccessLHS = undefined; } } return value; }const { useState, useEffect, useCallback } = React;
+ function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }const { useState, useEffect, useCallback } = React;
 
 // ── SZOBA RENDSZER ────────────────────────────────────────────────────────────
 // Minden adat JSONBin.io-n tárolódik
@@ -2053,3 +2051,7 @@ setRoomId(””); setRoomName(””); setInitData(null);
 
 ReactDOM.createRoot(document.getElementById(“root”)).render(React.createElement(Root, null));
 if(window.__hideLoading) window.__hideLoading();
+</script>
+
+</body>
+</html>
