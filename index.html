@@ -65,8 +65,8 @@
   <script>
  function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }const { useState, useEffect, useCallback } = React;
 
-// ── SZOBA RENDSZER ────────────────────────────────────────────────────────────
-// Minden adat JSONBin.io-n tárolódik
+// – SZOBA RENDSZER ————————————————————
+// Minden adat JSONBin.io-n tarolodik
 // apiKey = JSONBin master key (localStorage-ban)
 // roomId = JSONBin bin ID = szoba kulcs (localStorage-ban)
 
@@ -102,7 +102,7 @@ if(!r.ok) throw new Error(r.status);
 return (await r.json()).metadata.id;
 }
 
-// ── SETUP KÉPERNYŐ ────────────────────────────────────────────────────────────
+// – SETUP KEPERNYO ————————————————————
 function SetupScreen({onDone}) {
 const [key, setKey] = useState(””);
 const [loading, setLoading] = useState(false);
@@ -111,7 +111,7 @@ const [err, setErr] = useState(””);
 const verify = () => {
 const k = key.trim();
 if(!k){setErr(“Add meg az API kulcsot!”); return;}
-// Nem validálunk előre – a kulcs helyességét szoba létrehozáskor ellenőrzi
+// Nem validalunk elore – a kulcs helyesseget szoba letrehozaskor ellenorzi
 localStorage.setItem(LS_KEY, k);
 onDone(k);
 };
@@ -124,16 +124,16 @@ background:“radial-gradient(ellipse at 50% 0%,#1a0e04 0%,#0c0905 100%)”,padd
 , React.createElement(‘div’, { style: {color:”#3a2410”,fontSize:11,letterSpacing:7,marginBottom:4},}, “– ✦ ✦ ✦ –”    )
 , React.createElement(‘h1’, { style: {fontFamily:”‘Rye’,serif”,fontSize:72,color:”#e8b84b”,letterSpacing:8,
 textShadow:“0 0 50px #e8b84b2a,0 2px 0 #000”,lineHeight:1},}, “BANG!”)
-, React.createElement(‘p’, { style: {color:”#5a3a18”,fontSize:12,letterSpacing:6,marginTop:4},}, “HÁZI RANGLISTA” )
+, React.createElement(‘p’, { style: {color:”#5a3a18”,fontSize:12,letterSpacing:6,marginTop:4},}, “HAZI RANGLISTA” )
 )
 
 ```
     , React.createElement('div', { style: {padding:24,border:"1px solid #3a2010",borderRadius:10,background:"#100c06"},}
       , React.createElement('div', { style: {color:"#c89030",fontWeight:700,fontSize:16,marginBottom:6},}, "🔑 JSONBin API kulcs"   )
-      , React.createElement('div', { style: {color:"#5a3a18",fontSize:13,lineHeight:1.8,marginBottom:16},}, "Az adatok biztonságos tárolásához szükséges egy ingyenes JSONBin fiók."
+      , React.createElement('div', { style: {color:"#5a3a18",fontSize:13,lineHeight:1.8,marginBottom:16},}, "Az adatok biztonsagos tarolasahoz szukseges egy ingyenes JSONBin fiok."
                 , React.createElement('br', null)
         , React.createElement('a', { href: "https://jsonbin.io", target: "_blank",
-          style: {color:"#e8b84b",textDecoration:"none"},}, "jsonbin.io"), " → Regisztrálj → API Keys → Master Key"
+          style: {color:"#e8b84b",textDecoration:"none"},}, "jsonbin.io"), " → Regisztralj → API Keys → Master Key"
       )
       , React.createElement('input', {
         type: "password",
@@ -148,10 +148,10 @@ textShadow:“0 0 50px #e8b84b2a,0 2px 0 #000”,lineHeight:1},}, “BANG!”)
       , React.createElement('button', { className: "btn", onClick: verify,
         style: {width:"100%",padding:"12px",background:"linear-gradient(180deg,#3a2208,#231504)",
           color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,
-          fontFamily:"'Rye',serif",fontSize:16,letterSpacing:2},}, "Tovább →"
+          fontFamily:"'Rye',serif",fontSize:16,letterSpacing:2},}, "Tovabb →"
 
       )
-      , React.createElement('div', { style: {marginTop:12,fontSize:11,color:"#3a2010",textAlign:"center"},}, "A kulcs csak a te böngésződben tárolódik, sehova sem kerül feltöltésre."
+      , React.createElement('div', { style: {marginTop:12,fontSize:11,color:"#3a2010",textAlign:"center"},}, "A kulcs csak a te bongeszodben tarolodik, sehova sem kerul feltoltesre."
 
       )
     )
@@ -162,7 +162,7 @@ textShadow:“0 0 50px #e8b84b2a,0 2px 0 #000”,lineHeight:1},}, “BANG!”)
 );
 }
 
-// ── SZOBA VÁLASZTÓ ────────────────────────────────────────────────────────────
+// – SZOBA VALASZTO ————————————————————
 function RoomScreen({apiKey, onJoin}) {
 const [mode,      setMode]      = useState(””); // “create”|“join”
 const [roomName,  setRoomName]  = useState(””);
@@ -172,24 +172,24 @@ const [err,       setErr]       = useState(””);
 const [created,   setCreated]   = useState(null); // {id, name}
 
 const createRoom = async () => {
-if(!roomName.trim()){setErr(“Add meg a szoba nevét!”); return;}
+if(!roomName.trim()){setErr(“Add meg a szoba nevet!”); return;}
 setLoading(true); setErr(””);
 try {
 const id = await jbCreate(apiKey, roomName.trim());
 setCreated({id, name:roomName.trim()});
 } catch(e) {
-setErr(“Hiba a szoba létrehozásakor: “ + e.message);
+setErr(“Hiba a szoba letrehozasakor: “ + e.message);
 }
 setLoading(false);
 };
 
 const joinRoom = async () => {
 const key = roomKey.trim();
-if(!key){setErr(“Add meg a szoba kulcsát!”); return;}
+if(!key){setErr(“Add meg a szoba kulcsat!”); return;}
 setLoading(true); setErr(””);
 try {
 const d = await jbRead(key, apiKey);
-if(!d||!Array.isArray(d.players)) throw new Error(“Érvénytelen szoba (adat)”);
+if(!d||!Array.isArray(d.players)) throw new Error(“Ervenytelen szoba (adat)”);
 localStorage.setItem(LS_ROOM, key);
 localStorage.setItem(LS_RNAME, “Szoba”);
 onJoin(key, “Szoba”, d.players, d.games);
@@ -217,7 +217,7 @@ background:“radial-gradient(ellipse at 50% 0%,#1a0e04 0%,#0c0905 100%)”,padd
 , React.createElement(‘div’, { style: {textAlign:“center”,marginBottom:24},}
 , React.createElement(‘h1’, { style: {fontFamily:”‘Rye’,serif”,fontSize:56,color:”#e8b84b”,letterSpacing:6,
 textShadow:“0 0 50px #e8b84b2a”,lineHeight:1},}, “BANG!”)
-, React.createElement(‘p’, { style: {color:”#5a3a18”,fontSize:11,letterSpacing:5,marginTop:3},}, “HÁZI RANGLISTA” )
+, React.createElement(‘p’, { style: {color:”#5a3a18”,fontSize:11,letterSpacing:5,marginTop:3},}, “HAZI RANGLISTA” )
 )
 
 ```
@@ -226,18 +226,18 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1},}, “BANG!”)
         , React.createElement('button', { className: "btn", onClick: ()=>setMode("create"),
           style: {padding:"16px",background:"linear-gradient(180deg,#1a4018,#0e2a0e)",
             color:"#50c878",border:"1px solid #3a7030",borderRadius:8,
-            fontFamily:"'Rye',serif",fontSize:18,letterSpacing:2},}, "🆕 Új szoba létrehozása"
+            fontFamily:"'Rye',serif",fontSize:18,letterSpacing:2},}, "🆕 Uj szoba letrehozasa"
 
         )
         , React.createElement('button', { className: "btn", onClick: ()=>setMode("join"),
           style: {padding:"16px",background:"linear-gradient(180deg,#2a1a08,#1a0e04)",
             color:"#e8b84b",border:"1px solid #6a4010",borderRadius:8,
-            fontFamily:"'Rye',serif",fontSize:18,letterSpacing:2},}, "🔑 Csatlakozás szoba kulccsal"
+            fontFamily:"'Rye',serif",fontSize:18,letterSpacing:2},}, "🔑 Csatlakozas szoba kulccsal"
 
         )
         , React.createElement('button', { className: "btn", onClick: resetKey,
           style: {padding:"8px",background:"transparent",color:"#3a2010",
-            border:"1px solid #2a1808",borderRadius:6,fontSize:12},}, "← Más API kulcs megadása"
+            border:"1px solid #2a1808",borderRadius:6,fontSize:12},}, "← Mas API kulcs megadasa"
 
         )
       )
@@ -245,7 +245,7 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1},}, “BANG!”)
 
     , mode==="create" && !created && (
       React.createElement('div', { style: {padding:22,border:"1px solid #2a4020",borderRadius:10,background:"#0a1208"},}
-        , React.createElement('div', { style: {color:"#50c878",fontWeight:700,fontSize:16,marginBottom:12},}, "🆕 Új szoba"  )
+        , React.createElement('div', { style: {color:"#50c878",fontWeight:700,fontSize:16,marginBottom:12},}, "🆕 Uj szoba"  )
         , React.createElement('input', { value: roomName, onChange: e=>setRoomName(e.target.value),
           onKeyDown: e=>e.key==="Enter"&&createRoom(),
           placeholder: "Szoba neve (pl. Pali csapata)"    ,
@@ -259,7 +259,7 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1},}, “BANG!”)
           , React.createElement('button', { className: "btn", onClick: createRoom, disabled: loading,
             style: {flex:2,padding:"10px",background:"linear-gradient(180deg,#1a4018,#0e2a0e)",
               color:"#50c878",border:"1px solid #3a7030",borderRadius:5,fontSize:15,fontWeight:700},}
-            , loading?React.createElement('span', { className: "spin",}, "⟳"):"Létrehozás"
+            , loading?React.createElement('span', { className: "spin",}, "⟳"):"Letrehozas"
           )
         )
       )
@@ -267,8 +267,8 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1},}, “BANG!”)
 
     , created && (
       React.createElement('div', { style: {padding:22,border:"1px solid #2a4020",borderRadius:10,background:"#0a1208",textAlign:"center"},}
-        , React.createElement('div', { style: {color:"#50c878",fontWeight:700,fontSize:16,marginBottom:6},}, "✅ Szoba létrehozva!"  )
-        , React.createElement('div', { style: {color:"#4a6a4a",fontSize:13,marginBottom:16,lineHeight:1.8},}, "Mentsd el ezt a kulcsot -- ezzel tudnak mások csatlakozni:"
+        , React.createElement('div', { style: {color:"#50c878",fontWeight:700,fontSize:16,marginBottom:6},}, "✅ Szoba letrehozva!"  )
+        , React.createElement('div', { style: {color:"#4a6a4a",fontSize:13,marginBottom:16,lineHeight:1.8},}, "Mentsd el ezt a kulcsot -- ezzel tudnak masok csatlakozni:"
 
         )
         , React.createElement('div', { style: {background:"#060e06",border:"1px solid #2a5020",borderRadius:6,
@@ -279,13 +279,13 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1},}, “BANG!”)
         , React.createElement('button', { className: "btn", onClick: ()=>{
           _optionalChain([navigator, 'access', _2 => _2.clipboard, 'optionalAccess', _3 => _3.writeText, 'call', _4 => _4(created.id), 'access', _5 => _5.then, 'call', _6 => _6(()=>{}), 'access', _7 => _7.catch, 'call', _8 => _8(()=>{})]);
         }, style: {fontSize:12,color:"#5a8050",background:"transparent",border:"1px solid #2a4020",
-          borderRadius:4,padding:"4px 12px",marginBottom:14,cursor:"pointer"},}, "📋 Kulcs másolása"
+          borderRadius:4,padding:"4px 12px",marginBottom:14,cursor:"pointer"},}, "📋 Kulcs masolasa"
 
         )
         , React.createElement('button', { className: "btn", onClick: enterCreated,
           style: {width:"100%",padding:"12px",background:"linear-gradient(180deg,#3a2208,#231504)",
             color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,
-            fontFamily:"'Rye',serif",fontSize:17,letterSpacing:2},}, "Belépés a szobába →"
+            fontFamily:"'Rye',serif",fontSize:17,letterSpacing:2},}, "Belepes a szobaba →"
 
         )
       )
@@ -296,7 +296,7 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1},}, “BANG!”)
         , React.createElement('div', { style: {color:"#e8b84b",fontWeight:700,fontSize:16,marginBottom:12},}, "🔑 Szoba kulcs"  )
         , React.createElement('input', { value: roomKey, onChange: e=>setRoomKey(e.target.value),
           onKeyDown: e=>e.key==="Enter"&&joinRoom(),
-          placeholder: "Másold be a szoba kulcsát..."    ,
+          placeholder: "Masold be a szoba kulcsat..."    ,
           style: {width:"100%",background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
             borderRadius:5,padding:"10px 14px",fontSize:14,marginBottom:10,outline:"none",
             fontFamily:"monospace"},})
@@ -308,7 +308,7 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1},}, “BANG!”)
           , React.createElement('button', { className: "btn", onClick: joinRoom, disabled: loading,
             style: {flex:2,padding:"10px",background:"linear-gradient(180deg,#2a1a08,#1a0e04)",
               color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,fontSize:15,fontWeight:700},}
-            , loading?React.createElement('span', { className: "spin",}, "⟳"):"Csatlakozás"
+            , loading?React.createElement('span', { className: "spin",}, "⟳"):"Csatlakozas"
           )
         )
       )
@@ -320,18 +320,18 @@ textShadow:“0 0 50px #e8b84b2a”,lineHeight:1},}, “BANG!”)
 );
 }
 
-// ── FŐ APP ────────────────────────────────────────────────────────────────────
+// – FO APP ––––––––––––––––––––––––––––––––––
 
 const ROLES = {
 seriff:    { label:“Seriff”,    icon:“🤠”, color:”#e8b84b”, dark:”#3a2408”, team:“seriff”,  base:3.5 },
 helyettes: { label:“Helyettes”, icon:“⭐”, color:”#c89030”, dark:”#2e1c06”, team:“seriff”,  base:3.5 },
 bandita:   { label:“Bandita”,   icon:“💀”, color:”#e05050”, dark:”#380c0c”, team:“bandita”, base:5.0 },
-renegat:   { label:“Renegát”,   icon:“🃏”, color:”#50c878”, dark:”#0c3018”, team:“renegat”, base:10.0 },
+renegat:   { label:“Renegat”,   icon:“🃏”, color:”#50c878”, dark:”#0c3018”, team:“renegat”, base:10.0 },
 };
-// Szerepenkénti pontok létszám szerint (matematikailag kiegyensúlyozott)
-// Várható érték (győzési% × pont) minden szerepnél ~1.5 pt/játék
-// 5 fős: Seriff/Helyettes ~45%, Bandita ~30%, Renegát ~15%
-// 6 fős: Seriff ~45%, Helyettes ~35% (titkos, 2v4!), Bandita ~25% (2v3), Renegát ~10%
+// Szerepenkenti pontok letszam szerint (matematikailag kiegyensulyozott)
+// Varhato ertek (gyozesi% × pont) minden szerepnel ~1.5 pt/jatek
+// 5 fos: Seriff/Helyettes ~45%, Bandita ~30%, Renegat ~15%
+// 6 fos: Seriff ~45%, Helyettes ~35% (titkos, 2v4!), Bandita ~25% (2v3), Renegat ~10%
 const ROLE_PTS = {
 seriff:    { 5: 3.5, 6: 3.5 },
 helyettes: { 5: 3.5, 6: 4.5 },
@@ -344,8 +344,8 @@ const CONFIGS = {
 };
 const WIN_TEAMS = {
 seriff:  { label:“Seriff csapata”, icon:“🤠”, color:”#e8b84b” },
-bandita: { label:“Banditák”,       icon:“💀”, color:”#e05050” },
-renegat: { label:“Renegát”,        icon:“🃏”, color:”#50c878” },
+bandita: { label:“Banditak”,       icon:“💀”, color:”#e05050” },
+renegat: { label:“Renegat”,        icon:“🃏”, color:”#50c878” },
 };
 
 function calcPts(role, winTeam, pc) {
@@ -359,7 +359,7 @@ players.forEach(p => {
 s[p.id] = { id:p.id, name:p.name, pts:0, wins:0, played:0,
 roles:{}, teamStats:{}, pcStats:{5:{p:0,w:0},6:{p:0,w:0}},
 streak:0, maxStreak:0, maxLoseStreak:0, teammates:{},
-nemesis:{}, // pid -> hányszor nyert ellenünk
+nemesis:{}, // pid -> hanyszor nyert ellenunk
 scoreHistory:[] // [{date,pts,cumPts}]
 };
 });
@@ -385,7 +385,7 @@ if (b.pid===a.pid || teamOf[b.pid]!==team) return;
 st.teammates[b.pid] = (st.teammates[b.pid]||0) + 1;
 });
 } else {
-// vereség: kik voltak a győztes csapaton (ők a “nemezis” jelöltek)
+// vereseg: kik voltak a gyoztes csapaton (ok a “nemezis” jeloltek)
 g.assignments.forEach(b => {
 if (b.pid===a.pid) return;
 if (_optionalChain([ROLES, ‘access’, _15 => _15[b.role], ‘optionalAccess’, _16 => _16.team]) === g.winTeam) {
@@ -395,18 +395,18 @@ st.nemesis[b.pid] = (st.nemesis[b.pid]||0) + 1;
 }
 });
 });
-// Streak + scoreHistory (játékok időrendben: games[0]=legújabb, reverse=legrégebbi először)
+// Streak + scoreHistory (jatekok idorendben: games[0]=legujabb, reverse=legregebbi eloszor)
 players.forEach(p => {
 if (!s[p.id]) return;
 let cumPts=0;
-// scoreHistory: legrégebbitől legújabbig (chart-hoz)
+// scoreHistory: legregebbitol legujabbig (chart-hoz)
 […games].reverse().forEach(g => {
 const a = g.assignments.find(x=>x.pid===p.id); if (!a) return;
 const pts = calcPts(a.role,g.winTeam,g.pc);
 cumPts += pts;
 s[p.id].scoreHistory.push({date:g.date, pts, cumPts});
 });
-// Streak: legújabb játéktól visszafelé (games[0] = legújabb)
+// Streak: legujabb jatektol visszafele (games[0] = legujabb)
 let streak=0, maxW=0, maxL=0, cur=0, curL=0;
 for (const g of games) {
 const a = g.assignments.find(x=>x.pid===p.id); if (!a) continue;
@@ -414,7 +414,7 @@ const won = calcPts(a.role,g.winTeam,g.pc) > 0;
 if (won) { cur++; maxW=Math.max(maxW,cur); curL=0; }
 else     { curL++; maxL=Math.max(maxL,curL); cur=0; }
 }
-// Jelenlegi sorozat: legújabbtól az első megszakadásig (nem játszott meccsek átugorva)
+// Jelenlegi sorozat: legujabbtol az elso megszakadasig (nem jatszott meccsek atugorva)
 for (const g of games) {
 const a = g.assignments.find(x=>x.pid===p.id); if (!a) continue;
 const won = calcPts(a.role,g.winTeam,g.pc) > 0;
@@ -479,13 +479,13 @@ const [rounds,   setRounds]   = useState(””);
 const [syncStatus, setSyncStatus] = useState(“idle”); // idle|saving|ok|err
 const [lastSync,   setLastSync]   = useState(null);
 
-// ── SZOBA / JSONBIN SYNC ─────────────────────────────────────────────
+// – SZOBA / JSONBIN SYNC ———————————————
 
 const notify = (msg, err=false) => {
 setToast({msg,err}); setTimeout(()=>setToast(null),3000);
 };
 
-// Betöltés induláskor – initData-ból vagy JSONBin-ből
+// Betoltes indulaskor – initData-bol vagy JSONBin-bol
 useEffect(()=>{
 if(initPlayers && initGames) {
 setPlayers(initPlayers); setGames(initGames);
@@ -511,15 +511,15 @@ setSyncStatus(“ok”);
 setTimeout(()=>setSyncStatus(“idle”),2000);
 } catch(e) {
 setSyncStatus(“err”);
-notify(“Szinkronizálási hiba!”, true);
+notify(“Szinkronizalasi hiba!”, true);
 }
 };
 
 const addPlayer = () => {
 const name = newName.trim(); if (!name) return;
-if (players.find(p=>p.name.toLowerCase()===name.toLowerCase())) { notify(“Már létezik!”,true); return; }
+if (players.find(p=>p.name.toLowerCase()===name.toLowerCase())) { notify(“Mar letezik!”,true); return; }
 update([…players,{id:Date.now().toString(),name}], games);
-setNewName(””); notify(`${name} hozzáadva ✓`);
+setNewName(””); notify(`${name} hozzaadva ✓`);
 };
 const delPlayer = id => update(players.filter(p=>p.id!==id), games);
 
@@ -533,11 +533,11 @@ const ng = { id:Date.now().toString(), date, pc, winTeam:winner,
 rounds: rounds ? parseInt(rounds) : null,
 assignments:slots.map((role,i)=>({pid:assign[i],role})) };
 update(players, [ng,…games]);
-setAssign({}); setWinner(””); setRounds(””); setView(“lb”); notify(“Játék mentve ✓”);
+setAssign({}); setWinner(””); setRounds(””); setView(“lb”); notify(“Jatek mentve ✓”);
 };
 const delGame = id => update(players, games.filter(g=>g.id!==id));
 
-// Manuel szinkronizálás
+// Manuel szinkronizalas
 const doSync = async () => {
 if(!apiKey||!roomId) return;
 setSyncStatus(“saving”);
@@ -551,11 +551,11 @@ setLastSync(new Date().toLocaleTimeString(“hu-HU”,{hour:“2-digit”,minute
 setTimeout(()=>setSyncStatus(“idle”),2000);
 } catch(e) {
 setSyncStatus(“err”);
-notify(“Szinkronizálási hiba!”, true);
+notify(“Szinkronizalasi hiba!”, true);
 }
 };
 
-// Auto-szinkronizálás 30 másodpercenként
+// Auto-szinkronizalas 30 masodpercenkent
 useEffect(()=>{
 const id = setInterval(doSync, 30000);
 return ()=>clearInterval(id);
@@ -582,7 +582,7 @@ React.createElement(‘div’, { style: S.root,}
   , React.createElement('header', { style: S.hdr,}
     , React.createElement('div', { style: S.deco,}, "-- ✦ ✦ ✦ --"    )
     , React.createElement('h1', { style: S.title,}, "BANG!")
-    , React.createElement('p', { style: S.sub,}, "H Á Z I   R A N G L I S T A"             )
+    , React.createElement('p', { style: S.sub,}, "H A Z I   R A N G L I S T A"             )
     , roomName&&React.createElement('div', { style: {marginTop:4,fontSize:11,color:"#5a3a18",letterSpacing:2},}, "🏠 "
        , roomName
     )
@@ -590,7 +590,7 @@ React.createElement(‘div’, { style: S.root,}
     , React.createElement('div', { style: {marginTop:7,display:"flex",alignItems:"center",justifyContent:"center",gap:8},}
       , React.createElement('span', { style: {fontSize:11,letterSpacing:1,color:
         syncStatus==="ok"?"#3a6a3a":syncStatus==="err"?"#6a2020":syncStatus==="saving"?"#6a5a20":"#3a2a10"},}
-        , syncStatus==="saving"?"⏳ Mentés...":syncStatus==="ok"?"✅ Szinkronizálva":syncStatus==="err"?"⚠️ Hiba":"☁️ Szinkronizálva"
+        , syncStatus==="saving"?"⏳ Mentes...":syncStatus==="ok"?"✅ Szinkronizalva":syncStatus==="err"?"⚠️ Hiba":"☁️ Szinkronizalva"
       )
       , React.createElement('button', { className: "btn", onClick: doSync,
         style: {fontSize:11,color:"#5a3a18",background:"transparent",border:"1px solid #2a1808",
@@ -602,25 +602,25 @@ React.createElement(‘div’, { style: S.root,}
 
   , React.createElement('nav', { style: S.nav,}
     , [{k:"lb",l:"🏆 Ranglista"},{k:"stats",l:"📊 Statisztika"},
-      {k:"new",l:"🃏 Új Játék"},{k:"pl",l:"👥 Játékosok"},
-      {k:"hist",l:"📜 Előzmények"}
+      {k:"new",l:"🃏 Uj Jatek"},{k:"pl",l:"👥 Jatekosok"},
+      {k:"hist",l:"📜 Elozmenyek"}
     ].map(({k,l})=>(
       React.createElement('button', { key: k, className: `btn nb${view===k?" on":""}`,
         onClick: ()=>setView(k),
         style: {...S.navBtn,color:view===k?"#e8b84b":"#7a5a28",},}, l)
     ))
-    , React.createElement('button', { className: "btn", onClick: ()=>{if(window.confirm("Kilépsz a szobából?")) onLeaveRoom();},
-      style: {...S.navBtn,color:"#4a2010"},}, "🚪 Kilépés" )
+    , React.createElement('button', { className: "btn", onClick: ()=>{if(window.confirm("Kilepsz a szobabol?")) onLeaveRoom();},
+      style: {...S.navBtn,color:"#4a2010"},}, "🚪 Kilepes" )
   )
 
   , React.createElement('main', { style: S.main,}
 
-    /* ══ RANGLISTA ══ */
+    /* == RANGLISTA == */
     , view==="lb"&&(
       React.createElement('div', { className: "fu",}
-        , React.createElement('h2', { style: S.sh,}, "Végeredmény")
+        , React.createElement('h2', { style: S.sh,}, "Vegeredmeny")
         , lb.length===0
-          ? React.createElement(Empty, null, "Adj hozzá játékosokat, majd rögzíts egy játékot."      )
+          ? React.createElement(Empty, null, "Adj hozza jatekosokat, majd rogzits egy jatekot."      )
           : lb.map((p,i)=>{
             const isExp=expanded===p.id;
             const bc=["#e8b84b","#b0b0b0","#c07830"][i]||"#2a1808";
@@ -665,12 +665,12 @@ React.createElement(‘div’, { style: S.root,}
                   React.createElement('div', { style: {background:"#130e06",border:"1px solid #2a1808",borderTop:"none",
                     borderRadius:"0 0 6px 6px",padding:13},}
                     , React.createElement('div', { style: {display:"flex",gap:7,flexWrap:"wrap",marginBottom:11},}
-                      , React.createElement(Badge, { label: "Pontszám",  val: p.pts.toFixed(1), color: "#e8b84b",})
-                      , React.createElement(Badge, { label: "Gy. arány" , val: `${wr}%`, sub: `${p.wins}/${p.played}`, color: wr>=50?"#50c878":"#e05050",})
+                      , React.createElement(Badge, { label: "Pontszam",  val: p.pts.toFixed(1), color: "#e8b84b",})
+                      , React.createElement(Badge, { label: "Gy. arany" , val: `${wr}%`, sub: `${p.wins}/${p.played}`, color: wr>=50?"#50c878":"#e05050",})
                       , React.createElement(Badge, { label: "Max sor." ,  val: p.maxStreak, color: "#c89030",})
                       , p.streak>0&&React.createElement(Badge, { label: "Jelenlegi", val: `${p.streak}🔥`, color: "#e8b84b",})
                     )
-                    , React.createElement(Sec, { title: "Szerep győzési arányok"  ,}
+                    , React.createElement(Sec, { title: "Szerep gyozesi aranyok"  ,}
                       , Object.keys(p.roles).map(role=>{
                         const rs={won:0,played:0};
                         games.forEach(g=>{
@@ -687,7 +687,7 @@ React.createElement(‘div’, { style: S.root,}
                         );
                       })
                     )
-                    , React.createElement(Sec, { title: "Csapatszín teljesítmény" ,}
+                    , React.createElement(Sec, { title: "Csapatszin teljesitmeny" ,}
                       , Object.entries(p.teamStats).filter(([,v])=>v.p>0).map(([team,v])=>(
                         React.createElement(Row, { key: team,}
                           , React.createElement('span', { style: {color:WIN_TEAMS[team].color,minWidth:118,fontSize:13},}, WIN_TEAMS[team].icon, " " , WIN_TEAMS[team].label)
@@ -696,7 +696,7 @@ React.createElement(‘div’, { style: S.root,}
                         )
                       ))
                     )
-                    , React.createElement(Sec, { title: "Létszám szerint" ,}
+                    , React.createElement(Sec, { title: "Letszam szerint" ,}
                       , React.createElement('div', { style: {display:"flex",gap:8},}
                         , [5,6].map(n=>{
                           const v=p.pcStats[n]; if(!v||v.p===0) return null;
@@ -704,7 +704,7 @@ React.createElement(‘div’, { style: S.root,}
                           return (
                             React.createElement('div', { key: n, style: {flex:1,textAlign:"center",padding:10,
                               background:"#0e0a05",borderRadius:6,border:"1px solid #2a1808"},}
-                              , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:15,color:"#c89030"},}, n, " fős" )
+                              , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:15,color:"#c89030"},}, n, " fos" )
                               , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:20,color:pct>=50?"#50c878":"#e05050"},}, pct, "%")
                               , React.createElement('div', { style: {fontSize:11,color:"#3a2810"},}, v.w, "G/", v.p, "J")
                             )
@@ -713,7 +713,7 @@ React.createElement(‘div’, { style: S.root,}
                       )
                     )
                     , Object.keys(p.teammates).length>0&&(
-                      React.createElement(Sec, { title: "Legjobb csapattársak" ,}
+                      React.createElement(Sec, { title: "Legjobb csapattarsak" ,}
                         , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:5},}
                           , Object.entries(p.teammates).sort(([,a],[,b])=>b-a).slice(0,5).map(([pid,cnt])=>{
                             const mate=players.find(x=>x.id===pid); if(!mate) return null;
@@ -736,31 +736,31 @@ React.createElement(‘div’, { style: S.root,}
                         if(recent.length>=5) break;
                       }
                       if(!recent.length) return null;
-                      // Formában van: utolsó 3 átlaga vs összes átlag
+                      // Formaban van: utolso 3 atlaga vs osszes atlag
                       const last3 = recent.slice(0,3);
                       const last3avg = last3.reduce((s,x)=>s+x.pts,0)/last3.length;
                       const allAvg = p.played>0 ? p.pts/p.played : 0;
                       const formaTrend = last3.length>=2
-                        ? (last3avg > allAvg*1.1 ? "📈 Formában van"
-                          : last3avg < allAvg*0.9 ? "📉 Visszaesés"
+                        ? (last3avg > allAvg*1.1 ? "📈 Formaban van"
+                          : last3avg < allAvg*0.9 ? "📉 Visszaeses"
                           : "➡️ Stabil")
                         : null;
                       return (
-                        React.createElement(Sec, { title: `Legutóbbi forma${formaTrend?" -- "+formaTrend:""}`,}
+                        React.createElement(Sec, { title: `Legutobbi forma${formaTrend?" -- "+formaTrend:""}`,}
                           , React.createElement('div', { style: {display:"flex",gap:5,flexWrap:"wrap",marginBottom:formaTrend?8:0},}
                             , recent.map((r,i)=>(
                               React.createElement('span', { key: i, style: {padding:"4px 10px",borderRadius:20,fontSize:12,
                                 background:r.won?"#0a2a0a":"#2a0a0a",
                                 border:`1px solid ${r.won?"#1a5a1a":"#5a1a1a"}`,
                                 color:r.won?"#50c878":"#e05050"},}
-                                , _optionalChain([ROLES, 'access', _17 => _17[r.role], 'optionalAccess', _18 => _18.icon]), " " , r.won?`+${r.pts} pt`:"Vereség"
+                                , _optionalChain([ROLES, 'access', _17 => _17[r.role], 'optionalAccess', _18 => _18.icon]), " " , r.won?`+${r.pts} pt`:"Vereseg"
                               )
                             ))
                           )
                           , formaTrend&&last3.length>=2&&(
-                            React.createElement('div', { style: {fontSize:11,color:"#5a3a18",marginTop:4},}, "Utolsó "
-                               , last3.length, " játék átl.: "   , React.createElement('strong', { style: {color:last3avg>allAvg?"#50c878":"#e05050"},}, last3avg.toFixed(1), " pt" )
-                              , " vs összes átl.: ", React.createElement('strong', { style: {color:"#c89030"},}, allAvg.toFixed(1), " pt" )
+                            React.createElement('div', { style: {fontSize:11,color:"#5a3a18",marginTop:4},}, "Utolso "
+                               , last3.length, " jatek atl.: "   , React.createElement('strong', { style: {color:last3avg>allAvg?"#50c878":"#e05050"},}, last3avg.toFixed(1), " pt" )
+                              , " vs osszes atl.: ", React.createElement('strong', { style: {color:"#c89030"},}, allAvg.toFixed(1), " pt" )
                             )
                           )
                         )
@@ -773,27 +773,27 @@ React.createElement(‘div’, { style: S.root,}
           })
         
         , React.createElement('div', { style: {marginTop:22,padding:13,border:"1px solid #2a1808",borderRadius:6,background:"#0e0a05"},}
-          , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:"#5a3a18",fontSize:11,letterSpacing:2,textAlign:"center",marginBottom:9},}, "PONTOZÁS")
+          , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:"#5a3a18",fontSize:11,letterSpacing:2,textAlign:"center",marginBottom:9},}, "PONTOZAS")
           , Object.entries(ROLES).map(([k,r])=>(
             React.createElement('div', { key: k, style: {display:"flex",alignItems:"center",gap:8,padding:"4px 0",borderBottom:"1px solid #1a1206",fontSize:12},}
               , React.createElement('span', null, r.icon)
               , React.createElement('span', { style: {color:r.color,fontWeight:700,minWidth:82},}, r.label)
-              , React.createElement('span', { style: {color:"#5a3a18"},}, "5 fős: "  , ROLE_PTS[k][5], " pt" )
-              , React.createElement('span', { style: {color:"#3a2010",marginLeft:"auto",fontSize:11},}, "6 fős: "  , ROLE_PTS[k][6], " pt" )
+              , React.createElement('span', { style: {color:"#5a3a18"},}, "5 fos: "  , ROLE_PTS[k][5], " pt" )
+              , React.createElement('span', { style: {color:"#3a2010",marginLeft:"auto",fontSize:11},}, "6 fos: "  , ROLE_PTS[k][6], " pt" )
             )
           ))
         )
       )
     )
 
-    /* ══ STATISZTIKA ══ */
+    /* == STATISZTIKA == */
     , view==="stats"&&(
       React.createElement('div', { className: "fu",}
-        , React.createElement('h2', { style: S.sh,}, "Részletes statisztikák" )
-        , games.length===0?React.createElement(Empty, null, "Még nincsenek rögzített játékok."   ):React.createElement(React.Fragment, null
+        , React.createElement('h2', { style: S.sh,}, "Reszletes statisztikak" )
+        , games.length===0?React.createElement(Empty, null, "Meg nincsenek rogzitett jatekok."   ):React.createElement(React.Fragment, null
           , React.createElement('div', { style: {display:"flex",gap:3,marginBottom:14,background:"#0e0a05",
             padding:4,borderRadius:6,border:"1px solid #2a1808"},}
-            , [{k:"players",l:"Játékos elemzés"},{k:"global",l:"Globális"}].map(({k,l})=>(
+            , [{k:"players",l:"Jatekos elemzes"},{k:"global",l:"Globalis"}].map(({k,l})=>(
               React.createElement('button', { key: k, className: "btn", onClick: ()=>setStab(k),
                 style: {flex:1,padding:"8px",borderRadius:4,fontSize:13,
                   background:stab===k?"#2a1a08":"transparent",
@@ -805,17 +805,17 @@ React.createElement(‘div’, { style: S.root,}
             const wr=Math.round(p.wins/p.played*100);
             const avgPts=p.played>0?(p.pts/p.played).toFixed(1):"--";
             const favRole=Object.entries(p.roles).sort(([,a],[,b])=>b-a)[0];
-            // Nemezis: ki ellen veszt a legtöbbet
+            // Nemezis: ki ellen veszt a legtobbet
             const nemesisList = Object.entries(p.nemesis)
               .map(([pid,cnt])=>({pid,cnt,name:_optionalChain([players, 'access', _19 => _19.find, 'call', _20 => _20(x=>x.id===pid), 'optionalAccess', _21 => _21.name])}))
               .filter(x=>x.name).sort((a,b)=>b.cnt-a.cnt).slice(0,3);
-            // Utolsó 5 vs összes átlag
+            // Utolso 5 vs osszes atlag
             const hist = p.scoreHistory;
             const last5 = hist.slice(-5);
             const last5avg = last5.length>0?(last5.reduce((s,x)=>s+x.pts,0)/last5.length).toFixed(1):"--";
             const allAvg = hist.length>0?(hist.reduce((s,x)=>s+x.pts,0)/hist.length).toFixed(1):"--";
             const trend = last5.length>0 && allAvg!=="--"
-              ? (parseFloat(last5avg)>parseFloat(allAvg)?"📈 Javuló":parseFloat(last5avg)<parseFloat(allAvg)?"📉 Romló":"➡️ Stabil")
+              ? (parseFloat(last5avg)>parseFloat(allAvg)?"📈 Javulo":parseFloat(last5avg)<parseFloat(allAvg)?"📉 Romlo":"➡️ Stabil")
               : null;
             return (
               React.createElement('div', { key: p.id, className: "sr", style: {marginBottom:13,animationDelay:`${i*.06}s`},}
@@ -830,16 +830,16 @@ React.createElement(‘div’, { style: S.root,}
                   , React.createElement('span', { style: {fontFamily:"'Rye',serif",fontSize:17,color:"#e8b84b"},}, p.pts.toFixed(1), " pt" )
                 )
                 , React.createElement('div', { style: {background:"#100c06",border:"1px solid #2a1808",borderTop:"none",borderRadius:"0 0 6px 6px",padding:11},}
-                  /* Fő badgek */
+                  /* Fo badgek */
                   , React.createElement('div', { style: {display:"flex",gap:7,flexWrap:"wrap",marginBottom:11},}
-                    , React.createElement(Badge, { label: "Gy. arány" , val: `${wr}%`, sub: `${p.wins}/${p.played}`, color: wr>=50?"#50c878":"#e05050",})
-                    , React.createElement(Badge, { label: "Átl. pt/játék" , val: avgPts, color: "#e8b84b",})
+                    , React.createElement(Badge, { label: "Gy. arany" , val: `${wr}%`, sub: `${p.wins}/${p.played}`, color: wr>=50?"#50c878":"#e05050",})
+                    , React.createElement(Badge, { label: "Atl. pt/jatek" , val: avgPts, color: "#e8b84b",})
                     , React.createElement(Badge, { label: "Max gy. sor."  , val: p.maxStreak, color: "#c89030",})
                     , React.createElement(Badge, { label: "Max veszt. sor."  , val: p.maxLoseStreak, color: "#c05050",})
                     , p.streak>0&&React.createElement(Badge, { label: "Jelenlegi", val: `${p.streak}🔥`, color: "#e8b84b",})
                   )
 
-                  /* Pontszám időbeli trendje -- mini sparkline */
+                  /* Pontszam idobeli trendje -- mini sparkline */
                   , hist.length>1&&(()=>{
                     const maxC=Math.max(...hist.map(x=>x.cumPts),0.1);
                     const W=280, H=44;
@@ -849,7 +849,7 @@ React.createElement(‘div’, { style: S.root,}
                     }));
                     const path = pts2.map((p,i)=>`${i===0?"M":"L"}${p.x},${p.y}`).join(" ");
                     return (
-                      React.createElement(Sec, { title: `Pontszám alakulása időben${trend?" -- "+trend:""}`,}
+                      React.createElement(Sec, { title: `Pontszam alakulasa idoben${trend?" -- "+trend:""}`,}
                         , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:12},}
                           , React.createElement('svg', { width: W, height: H, style: {flex:1,maxWidth:W},}
                             , React.createElement('path', { d: path, fill: "none", stroke: "#e8b84b", strokeWidth: "1.5", strokeLinejoin: "round",})
@@ -858,9 +858,9 @@ React.createElement(‘div’, { style: S.root,}
                             ))
                           )
                           , React.createElement('div', { style: {textAlign:"right",flexShrink:0},}
-                            , React.createElement('div', { style: {fontSize:11,color:"#5a3a18"},}, "Összes átl." )
+                            , React.createElement('div', { style: {fontSize:11,color:"#5a3a18"},}, "Osszes atl." )
                             , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:"#c89030",fontSize:16},}, allAvg, " pt" )
-                            , React.createElement('div', { style: {fontSize:11,color:"#5a3a18",marginTop:4},}, "Utolsó 5 átl."  )
+                            , React.createElement('div', { style: {fontSize:11,color:"#5a3a18",marginTop:4},}, "Utolso 5 atl."  )
                             , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:parseFloat(last5avg)>=parseFloat(allAvg)?"#50c878":"#e05050",fontSize:16},}, last5avg, " pt" )
                           )
                         )
@@ -870,22 +870,22 @@ React.createElement(‘div’, { style: S.root,}
 
                   /* Nemezis */
                   , nemesisList.length>0&&(
-                    React.createElement(Sec, { title: "Legeredményesebb ellenfél (ki nyert ellenünk legtöbbször)"     ,}
+                    React.createElement(Sec, { title: "Legeredmenyesebb ellenfel (ki nyert ellenunk legtobbszor)"     ,}
                       , React.createElement('div', { style: {display:"flex",flexWrap:"wrap",gap:5},}
                         , nemesisList.map((n,i)=>(
                           React.createElement('span', { key: i, style: {padding:"4px 11px",background:"#1e0808",
                             border:"1px solid #5a1a1a",borderRadius:20,fontSize:12},}
                             , React.createElement('span', { style: {color:"#e08080"},}, n.name)
-                            , React.createElement('span', { style: {color:"#c05050",marginLeft:5,fontWeight:700},}, n.cnt, "× győzött ellenünk"  )
+                            , React.createElement('span', { style: {color:"#c05050",marginLeft:5,fontWeight:700},}, n.cnt, "× gyozott ellenunk"  )
                           )
                         ))
                       )
                     )
                   )
 
-                  /* Szerep győzési arányok */
+                  /* Szerep gyozesi aranyok */
                   , React.createElement('div', { style: {marginBottom:10},}
-                    , React.createElement('div', { style: {color:"#3a2810",fontSize:10,letterSpacing:2,textTransform:"uppercase",marginBottom:7},}, "Szerep győzési arányok"  )
+                    , React.createElement('div', { style: {color:"#3a2810",fontSize:10,letterSpacing:2,textTransform:"uppercase",marginBottom:7},}, "Szerep gyozesi aranyok"  )
                     , Object.keys(p.roles).map(role=>{
                       const rs={won:0,played:0};
                       games.forEach(g=>{
@@ -903,7 +903,7 @@ React.createElement(‘div’, { style: S.root,}
                     })
                   )
 
-                  /* Csapatszín */
+                  /* Csapatszin */
                   , React.createElement('div', { style: {display:"flex",gap:7,flexWrap:"wrap"},}
                     , Object.entries(p.teamStats).filter(([,v])=>v.p>0).map(([team,v])=>{
                       const pct=Math.round(v.w/v.p*100);
@@ -948,25 +948,25 @@ React.createElement(‘div’, { style: S.root,}
             return (
               React.createElement('div', null
                 , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",marginBottom:13},}
-                  , React.createElement(Badge, { label: "Össz játék" , val: games.length, color: "#e8b84b",})
-                  , React.createElement(Badge, { label: "5 fős" , val: games.filter(g=>g.pc===5).length, color: "#c89030",})
-                  , React.createElement(Badge, { label: "6 fős" , val: games.filter(g=>g.pc===6).length, color: "#c89030",})
+                  , React.createElement(Badge, { label: "Ossz jatek" , val: games.length, color: "#e8b84b",})
+                  , React.createElement(Badge, { label: "5 fos" , val: games.filter(g=>g.pc===5).length, color: "#c89030",})
+                  , React.createElement(Badge, { label: "6 fos" , val: games.filter(g=>g.pc===6).length, color: "#c89030",})
                 )
-                , React.createElement(Sec, { title: "Csapatszínek győzelmi aránya"  ,}
+                , React.createElement(Sec, { title: "Csapatszinek gyozelmi aranya"  ,}
                   , Object.entries(tw).map(([team,wins])=>(
                     React.createElement(Row, { key: team,}
                       , React.createElement('span', { style: {color:WIN_TEAMS[team].color,minWidth:118,fontSize:13},}, WIN_TEAMS[team].icon, " " , WIN_TEAMS[team].label)
-                      , React.createElement('span', { style: {color:"#3a2810",fontSize:11,minWidth:52},}, wins, " győz." )
+                      , React.createElement('span', { style: {color:"#3a2810",fontSize:11,minWidth:52},}, wins, " gyoz." )
                       , React.createElement(Bar, { won: wins, played: games.length, color: WIN_TEAMS[team].color,})
                     )
                   ))
                 )
-                , React.createElement(Sec, { title: "Szerepek nehézségi táblázata -- győzési % és átlagos pont"        ,}
-                  , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Azonos csapatnál több szerep (pl. 2 Helyettes) külön kerül kimutatásra."
+                , React.createElement(Sec, { title: "Szerepek nehezsegi tablazata -- gyozesi % es atlagos pont"        ,}
+                  , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Azonos csapatnal tobb szerep (pl. 2 Helyettes) kulon kerul kimutatasra."
 
                   )
                   , Object.entries(rw).filter(([,v])=>v.p>0).map(([role,v])=>{
-                    // Átlagos pont ebben a szerepben
+                    // Atlagos pont ebben a szerepben
                     let totalPts=0, cnt=0;
                     games.forEach(g=>{
                       g.assignments.forEach(a=>{
@@ -978,7 +978,7 @@ React.createElement(‘div’, { style: S.root,}
                     return (
                       React.createElement(Row, { key: role,}
                         , React.createElement('span', { style: {color:ROLES[role].color,minWidth:98,fontSize:13},}, ROLES[role].icon, " " , ROLES[role].label)
-                        , React.createElement('span', { style: {color:"#4a6a4a",fontSize:11,minWidth:52},}, "átl. " , avgPt, " pt" )
+                        , React.createElement('span', { style: {color:"#4a6a4a",fontSize:11,minWidth:52},}, "atl. " , avgPt, " pt" )
                         , React.createElement('span', { style: {color:"#3a2810",fontSize:11,minWidth:40},}, v.w, "/", v.p)
                         , React.createElement(Bar, { won: v.w, played: v.p, color: ROLES[role].color,})
                       )
@@ -986,7 +986,7 @@ React.createElement(‘div’, { style: S.root,}
                   })
                 )
                 , topPairs.length>0&&(
-                  React.createElement(Sec, { title: "Legjobb párosok (közös győzelmek)"   ,}
+                  React.createElement(Sec, { title: "Legjobb parosok (kozos gyozelmek)"   ,}
                     , topPairs.map((pair,i)=>(
                       React.createElement('div', { key: i, style: {display:"flex",justifyContent:"space-between",
                         padding:"6px 10px",marginBottom:3,background:"#0e0a05",
@@ -998,7 +998,7 @@ React.createElement(‘div’, { style: S.root,}
                   )
                 )
 
-                /* Legjobb Seriff-Helyettes páros */
+                /* Legjobb Seriff-Helyettes paros */
                 , (()=>{
                   const shPairs={};
                   games.forEach(g=>{
@@ -1026,7 +1026,7 @@ React.createElement(‘div’, { style: S.root,}
                     .filter(x=>x.na&&x.nb);
                   if(!top.length) return null;
                   return (
-                    React.createElement(Sec, { title: "Legjobb Seriff-Helyettes párosok"  ,}
+                    React.createElement(Sec, { title: "Legjobb Seriff-Helyettes parosok"  ,}
                       , top.map((t,i)=>(
                         React.createElement(Row, { key: i,}
                           , React.createElement('span', { style: {color:"#e8b84b",minWidth:10,fontSize:13},}, "🤠⭐")
@@ -1039,7 +1039,7 @@ React.createElement(‘div’, { style: S.root,}
                   );
                 })()
 
-                /* Leggyakoribb csapatösszetétel */
+                /* Leggyakoribb csapatosszetetel */
                 , (()=>{
                   const comps={};
                   games.forEach(g=>{
@@ -1058,7 +1058,7 @@ React.createElement(‘div’, { style: S.root,}
                   const top = Object.values(comps).sort((a,b)=>b.count-a.count).slice(0,5);
                   if(!top.length) return null;
                   return (
-                    React.createElement(Sec, { title: "Leggyakoribb csapatösszetételek" ,}
+                    React.createElement(Sec, { title: "Leggyakoribb csapatosszetetelek" ,}
                       , top.map((c,i)=>(
                         React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,
                           padding:"6px 0",borderBottom:"1px solid #1a1206"},}
@@ -1072,7 +1072,7 @@ React.createElement(‘div’, { style: S.root,}
                   );
                 })()
 
-                /* Bandita győzési % amikor X a Seriff */
+                /* Bandita gyozesi % amikor X a Seriff */
                 , (()=>{
                   const bySeriff={};
                   games.forEach(g=>{
@@ -1088,7 +1088,7 @@ React.createElement(‘div’, { style: S.root,}
                     .sort(([,a],[,b])=>(b.bandWin/b.p)-(a.bandWin/a.p));
                   if(!rows.length) return null;
                   return (
-                    React.createElement(Sec, { title: "Bandita győzési % -- ki a Seriff? (ki ellen a legkönnyebb nyerni)"           ,}
+                    React.createElement(Sec, { title: "Bandita gyozesi % -- ki a Seriff? (ki ellen a legkonnyebb nyerni)"           ,}
                       , rows.map(([name,v],i)=>(
                         React.createElement(Row, { key: i,}
                           , React.createElement('span', { style: {color:"#e8b84b",minWidth:14},}, "🤠")
@@ -1101,17 +1101,17 @@ React.createElement(‘div’, { style: S.root,}
                   );
                 })()
 
-                /* Szerencsés Seriff + Jinx */
+                /* Szerencses Seriff + Jinx */
                 , (()=>{
                   const bySeriffFull={};
                   games.forEach(g=>{
                     const sA = g.assignments.find(a=>a.role==="seriff");
                     if(!sA) return;
                     const pid = sA.pid;
-                    if(!bySeriffFull[pid]) bySeriffFull[pid]={p:0,seriffWin:0,ellenfélWin:0};
+                    if(!bySeriffFull[pid]) bySeriffFull[pid]={p:0,seriffWin:0,ellenfelWin:0};
                     bySeriffFull[pid].p++;
                     if(g.winTeam==="seriff") bySeriffFull[pid].seriffWin++;
-                    else bySeriffFull[pid].ellenfélWin++;
+                    else bySeriffFull[pid].ellenfelWin++;
                   });
                   const rows = Object.entries(bySeriffFull)
                     .filter(([,v])=>v.p>=2)
@@ -1119,12 +1119,12 @@ React.createElement(‘div’, { style: S.root,}
                       name: _optionalChain([players, 'access', _50 => _50.find, 'call', _51 => _51(p=>p.id===pid), 'optionalAccess', _52 => _52.name]),
                       ...v,
                       luckyPct: Math.round(v.seriffWin/v.p*100),
-                      jinxPct:  Math.round(v.ellenfélWin/v.p*100),
+                      jinxPct:  Math.round(v.ellenfelWin/v.p*100),
                     }))
                     .filter(x=>x.name);
                   if(!rows.length) return null;
                   return (React.createElement(React.Fragment, null
-                    , React.createElement(Sec, { title: "🍀 Szerencsés Seriff -- hány % ban nyeri meg a játékot ha ő a Seriff?"              ,}
+                    , React.createElement(Sec, { title: "🍀 Szerencses Seriff -- hany % ban nyeri meg a jatekot ha o a Seriff?"              ,}
                       , [...rows].sort((a,b)=>b.luckyPct-a.luckyPct).map((r,i)=>(
                         React.createElement(Row, { key: i,}
                           , React.createElement('span', { style: {color:"#e8b84b",minWidth:14},}, "🤠")
@@ -1134,16 +1134,16 @@ React.createElement(‘div’, { style: S.root,}
                         )
                       ))
                     )
-                    , React.createElement(Sec, { title: "🪄 Jinx -- ha X a Seriff, az ellenfél hány % ban nyer?"            ,}
-                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Minél magasabb, annál nehezebb Seriff -- az ellenfélnek jobban kedvez."
+                    , React.createElement(Sec, { title: "🪄 Jinx -- ha X a Seriff, az ellenfel hany % ban nyer?"            ,}
+                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Minel magasabb, annal nehezebb Seriff -- az ellenfelnek jobban kedvez."
 
                       )
                       , [...rows].sort((a,b)=>b.jinxPct-a.jinxPct).map((r,i)=>(
                         React.createElement(Row, { key: i,}
                           , React.createElement('span', { style: {color:"#e05050",minWidth:14},}, "💀")
                           , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, r.name, " a Seriff"  )
-                          , React.createElement('span', { style: {color:"#4a3018",fontSize:11,minWidth:42},}, r.ellenfélWin, "/", r.p)
-                          , React.createElement(Bar, { won: r.ellenfélWin, played: r.p, color: "#e05050",})
+                          , React.createElement('span', { style: {color:"#4a3018",fontSize:11,minWidth:42},}, r.ellenfelWin, "/", r.p)
+                          , React.createElement(Bar, { won: r.ellenfelWin, played: r.p, color: "#e05050",})
                         )
                       ))
                     )
@@ -1152,7 +1152,7 @@ React.createElement(‘div’, { style: S.root,}
 
                 /* Konzisztencia + leghosszabb szerepsorozat */
                 , (()=>{
-                  // Konzisztencia: pontszám szórása játékonként
+                  // Konzisztencia: pontszam szorasa jatekonkent
                   const consistency = lb.filter(p=>p.scoreHistory.length>=3).map(p=>{
                     const pts = p.scoreHistory.map(h=>h.pts);
                     const avg = pts.reduce((s,x)=>s+x,0)/pts.length;
@@ -1161,7 +1161,7 @@ React.createElement(‘div’, { style: S.root,}
                     return { name:p.name, std:std.toFixed(1), avg:avg.toFixed(1), played:p.played };
                   }).sort((a,b)=>parseFloat(a.std)-parseFloat(b.std));
 
-                  // Ki játszotta legtöbbször ugyanazt a szerepet egymás után
+                  // Ki jatszotta legtobbszor ugyanazt a szerepet egymas utan
                   const roleStreaks = players.map(p=>{
                     let best={role:null,cnt:0}, cur={role:null,cnt:0};
                     games.slice().reverse().forEach(g=>{
@@ -1176,12 +1176,12 @@ React.createElement(‘div’, { style: S.root,}
 
                   return (React.createElement(React.Fragment, null
                     , consistency.length>0&&(
-                      React.createElement(Sec, { title: "📊 Konzisztencia -- pontszám szórása (kisebb = megbízhatóbb teljesítmény)"        ,}
+                      React.createElement(Sec, { title: "📊 Konzisztencia -- pontszam szorasa (kisebb = megbizhatobb teljesitmeny)"        ,}
                         , consistency.map((c,i)=>(
                           React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,
                             padding:"5px 0",borderBottom:"1px solid #1a1206"},}
                             , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, c.name)
-                            , React.createElement('span', { style: {color:"#5a4020",fontSize:11},}, c.played, " játék · átl. "    , c.avg, " pt" )
+                            , React.createElement('span', { style: {color:"#5a4020",fontSize:11},}, c.played, " jatek · atl. "    , c.avg, " pt" )
                             , React.createElement('span', { style: {fontFamily:"'Rye',serif",
                               color:parseFloat(c.std)<1.5?"#50c878":parseFloat(c.std)<3?"#e8b84b":"#e05050",
                               fontSize:15,minWidth:50,textAlign:"right"},}, "±", c.std)
@@ -1190,14 +1190,14 @@ React.createElement(‘div’, { style: S.root,}
                       )
                     )
                     , roleStreaks.length>0&&(
-                      React.createElement(Sec, { title: "🔁 Leghosszabb azonos szerepsorozat egymás után"     ,}
+                      React.createElement(Sec, { title: "🔁 Leghosszabb azonos szerepsorozat egymas utan"     ,}
                         , roleStreaks.slice(0,5).map((r,i)=>(
                           React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,
                             padding:"5px 0",borderBottom:"1px solid #1a1206"},}
                             , React.createElement('span', { style: {color:_optionalChain([ROLES, 'access', _53 => _53[r.role], 'optionalAccess', _54 => _54.color]),minWidth:20,fontSize:14},}, _optionalChain([ROLES, 'access', _55 => _55[r.role], 'optionalAccess', _56 => _56.icon]))
                             , React.createElement('span', { style: {color:_optionalChain([ROLES, 'access', _57 => _57[r.role], 'optionalAccess', _58 => _58.color]),fontSize:12,minWidth:70},}, _optionalChain([ROLES, 'access', _59 => _59[r.role], 'optionalAccess', _60 => _60.label]))
                             , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, r.name)
-                            , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#c89030",fontSize:16},}, r.cnt, "× egymás után"  )
+                            , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#c89030",fontSize:16},}, r.cnt, "× egymas utan"  )
                           )
                         ))
                       )
@@ -1205,33 +1205,33 @@ React.createElement(‘div’, { style: S.root,}
                   ));
                 })()
 
-                /* Átlagos körszám + időbeli adatok */
+                /* Atlagos korszam + idobeli adatok */
                 , (()=>{
                   const withRounds = games.filter(g=>g.rounds);
                   const avgRounds = withRounds.length>0
                     ? (withRounds.reduce((s,g)=>s+g.rounds,0)/withRounds.length).toFixed(1) : null;
-                  // Legtöbb játék egy napon
+                  // Legtobb jatek egy napon
                   const byDay={};
                   games.forEach(g=>{ byDay[g.date]=(byDay[g.date]||0)+1; });
                   const topDay = Object.entries(byDay).sort(([,a],[,b])=>b-a)[0];
-                  // Legaktívabb hónap
+                  // Legaktivabb honap
                   const byMonth={};
                   games.forEach(g=>{ const m=g.date.slice(0,7); byMonth[m]=(byMonth[m]||0)+1; });
                   const topMonth = Object.entries(byMonth).sort(([,a],[,b])=>b-a)[0];
                   return (
-                    React.createElement(Sec, { title: "Időbeli statisztikák" ,}
+                    React.createElement(Sec, { title: "Idobeli statisztikak" ,}
                       , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap"},}
-                        , avgRounds&&React.createElement(Badge, { label: "Átl. körszám" , val: avgRounds, sub: `${withRounds.length} játékból`, color: "#c89030",})
-                        , topDay&&React.createElement(Badge, { label: "Legtöbb játék/nap" , val: topDay[1], sub: topDay[0], color: "#e8b84b",})
-                        , topMonth&&React.createElement(Badge, { label: "Legaktívabb hónap" , val: topMonth[1], sub: topMonth[0], color: "#50c878",})
+                        , avgRounds&&React.createElement(Badge, { label: "Atl. korszam" , val: avgRounds, sub: `${withRounds.length} jatekbol`, color: "#c89030",})
+                        , topDay&&React.createElement(Badge, { label: "Legtobb jatek/nap" , val: topDay[1], sub: topDay[0], color: "#e8b84b",})
+                        , topMonth&&React.createElement(Badge, { label: "Legaktivabb honap" , val: topMonth[1], sub: topMonth[0], color: "#50c878",})
                       )
                     )
                   );
                 })()
 
-                /* Állandó vesztes szerep + Egytrik póni */
+                /* Allando vesztes szerep + Egytrik poni */
                 , (()=>{
-                  // Állandó vesztes: legrosszabb győzési % egy szerepben, min 3 játék
+                  // Allando vesztes: legrosszabb gyozesi % egy szerepben, min 3 jatek
                   const worstRole = [];
                   lb.forEach(p=>{
                     Object.keys(p.roles).forEach(role=>{
@@ -1249,8 +1249,8 @@ React.createElement(‘div’, { style: S.root,}
                   });
                   worstRole.sort((a,b)=>a.pct-b.pct);
 
-                  // Egytrik póni: egy szerepben jó, a többiben gyenge
-                  // "jó" = >50%, "gyenge" = <40%, min 2 játék mindkét kategóriában
+                  // Egytrik poni: egy szerepben jo, a tobbiben gyenge
+                  // "jo" = >50%, "gyenge" = <40%, min 2 jatek mindket kategoriaban
                   const ponies = lb.filter(p=>p.played>=4).map(p=>{
                     const roleStats = Object.keys(p.roles).map(role=>{
                       const rs={won:0,played:0};
@@ -1274,7 +1274,7 @@ React.createElement(‘div’, { style: S.root,}
 
                   return (React.createElement(React.Fragment, null
                     , worstRole.length>0&&(
-                      React.createElement(Sec, { title: "😬 Állandó vesztes szerep -- legrosszabb győzési % (min. 3 játék)"          ,}
+                      React.createElement(Sec, { title: "😬 Allando vesztes szerep -- legrosszabb gyozesi % (min. 3 jatek)"          ,}
                         , worstRole.slice(0,5).map((r,i)=>(
                           React.createElement(Row, { key: i,}
                             , React.createElement('span', { style: {color:_optionalChain([ROLES, 'access', _61 => _61[r.role], 'optionalAccess', _62 => _62.color]),minWidth:20},}, _optionalChain([ROLES, 'access', _63 => _63[r.role], 'optionalAccess', _64 => _64.icon]))
@@ -1287,7 +1287,7 @@ React.createElement(‘div’, { style: S.root,}
                       )
                     )
                     , ponies.length>0&&(
-                      React.createElement(Sec, { title: "🐴 Egytrik póni -- csak egy szerepben erős"       ,}
+                      React.createElement(Sec, { title: "🐴 Egytrik poni -- csak egy szerepben eros"       ,}
                         , ponies.map((p,i)=>(
                           React.createElement('div', { key: i, style: {padding:"6px 0",borderBottom:"1px solid #1a1206"},}
                             , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,marginBottom:3},}
@@ -1312,9 +1312,9 @@ React.createElement(‘div’, { style: S.root,}
                   ));
                 })()
 
-                /* Közvetlen párbaj táblázat + Örök rivális */
+                /* Kozvetlen parbaj tablazat + Orok rivalis */
                 , (()=>{
-                  // head-to-head: X és Y egymás elleni csapatain alapul
+                  // head-to-head: X es Y egymas elleni csapatain alapul
                   const h2h={};
                   games.forEach(g=>{
                     const winnerPids = g.assignments.filter(a=>_optionalChain([ROLES, 'access', _77 => _77[a.role], 'optionalAccess', _78 => _78.team])===g.winTeam).map(a=>a.pid);
@@ -1322,12 +1322,12 @@ React.createElement(‘div’, { style: S.root,}
                     winnerPids.forEach(w=>loserPids.forEach(l=>{
                       const key=[w,l].sort().join("_");
                       if(!h2h[key]) h2h[key]={};
-                      // w nyert l ellen ebben a játékban
+                      // w nyert l ellen ebben a jatekban
                       h2h[key][w] = (h2h[key][w]||0)+1;
                     }));
                   });
 
-                  // Örök rivális: kinek van a legtöbb egymás elleni meccse
+                  // Orok rivalis: kinek van a legtobb egymas elleni meccse
                   const rivalries = Object.entries(h2h).map(([key,scores])=>{
                     const [a,b]=key.split("_");
                     const aW=scores[a]||0, bW=scores[b]||0;
@@ -1342,8 +1342,8 @@ React.createElement(‘div’, { style: S.root,}
 
                   if(!rivalries.length) return null;
                   return (React.createElement(React.Fragment, null
-                    , React.createElement(Sec, { title: "⚔️ Közvetlen párbaj -- egymás elleni arány"      ,}
-                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Csak azok a játékok ahol a két játékos ellentétes csapaton volt."
+                    , React.createElement(Sec, { title: "⚔️ Kozvetlen parbaj -- egymas elleni arany"      ,}
+                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Csak azok a jatekok ahol a ket jatekos ellentetes csapaton volt."
 
                       )
                       , rivalries.slice(0,6).map((r,i)=>{
@@ -1366,9 +1366,9 @@ React.createElement(‘div’, { style: S.root,}
                       })
                     )
 
-                    , React.createElement(Sec, { title: "🏆 Örök rivális -- legtöbb egymás elleni meccs"       ,}
+                    , React.createElement(Sec, { title: "🏆 Orok rivalis -- legtobb egymas elleni meccs"       ,}
                       , rivalries.slice(0,3).map((r,i)=>{
-                        const leader = r.aW>r.bW?r.aName:r.bW>r.aW?r.bName:"Döntetlen";
+                        const leader = r.aW>r.bW?r.aName:r.bW>r.aW?r.bName:"Dontetlen";
                         return (
                           React.createElement('div', { key: i, style: {padding:"6px 10px",marginBottom:4,background:"#0e0a05",
                             borderRadius:6,border:"1px solid #2a1808"},}
@@ -1377,7 +1377,7 @@ React.createElement(‘div’, { style: S.root,}
                               , React.createElement('span', { style: {color:"#5a3a18",fontSize:11},}, r.total, " meccs" )
                             )
                             , React.createElement('div', { style: {color:"#50c878",fontSize:12,marginTop:2},}
-                              , r.aW===r.bW?"⚖️ Döntetlen":r.aW>r.bW?`🏅 ${r.aName} vezet ${r.aW}-${r.bW}`:`🏅 ${r.bName} vezet ${r.bW}-${r.aW}`
+                              , r.aW===r.bW?"⚖️ Dontetlen":r.aW>r.bW?`🏅 ${r.aName} vezet ${r.aW}-${r.bW}`:`🏅 ${r.bName} vezet ${r.bW}-${r.aW}`
                             )
                           )
                         );
@@ -1386,7 +1386,7 @@ React.createElement(‘div’, { style: S.root,}
                   ));
                 })()
 
-                /* Seriff-Bandita kombináció */
+                /* Seriff-Bandita kombinacio */
                 , (()=>{
                   const combos={};
                   games.forEach(g=>{
@@ -1407,7 +1407,7 @@ React.createElement(‘div’, { style: S.root,}
                   const top = Object.values(combos).filter(c=>c.p>=2).sort((a,b)=>b.p-a.p).slice(0,5);
                   if(!top.length) return null;
                   return (
-                    React.createElement(Sec, { title: "🤠💀 Seriff-Bandita kombináció -- ki harcol legtöbbször egymás ellen?"        ,}
+                    React.createElement(Sec, { title: "🤠💀 Seriff-Bandita kombinacio -- ki harcol legtobbszor egymas ellen?"        ,}
                       , top.map((c,i)=>(
                         React.createElement('div', { key: i, style: {padding:"7px 0",borderBottom:"1px solid #1a1206"},}
                           , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,marginBottom:4},}
@@ -1432,9 +1432,9 @@ React.createElement(‘div’, { style: S.root,}
                   );
                 })()
 
-                /* Tökéletes sorozat + Grand Slam */
+                /* Tokeletes sorozat + Grand Slam */
                 , (()=>{
-                  // Tökéletes sorozat: valaha ért el 3+ nyerő sorozatot
+                  // Tokeletes sorozat: valaha ert el 3+ nyero sorozatot
                   const perfStreaks = lb.map(p=>{
                     let best=0, cur=0;
                     [...p.scoreHistory].forEach(h=>{
@@ -1444,7 +1444,7 @@ React.createElement(‘div’, { style: S.root,}
                     return {name:p.name, best};
                   }).filter(p=>p.best>=3).sort((a,b)=>b.best-a.best);
 
-                  // Grand Slam: nyert-e mindhárom csapatszínnel
+                  // Grand Slam: nyert-e mindharom csapatszinnel
                   const grandSlam = lb.map(p=>{
                     const wonTeams = new Set();
                     games.forEach(g=>{
@@ -1458,7 +1458,7 @@ React.createElement(‘div’, { style: S.root,}
 
                   return (React.createElement(React.Fragment, null
                     , perfStreaks.length>0&&(
-                      React.createElement(Sec, { title: "🔥 Tökéletes sorozat -- valaha elért 3+ nyerő sorozat"        ,}
+                      React.createElement(Sec, { title: "🔥 Tokeletes sorozat -- valaha elert 3+ nyero sorozat"        ,}
                         , perfStreaks.map((p,i)=>(
                           React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,
                             padding:"5px 0",borderBottom:"1px solid #1a1206"},}
@@ -1469,10 +1469,10 @@ React.createElement(‘div’, { style: S.root,}
                         ))
                       )
                     )
-                    , React.createElement(Sec, { title: "🏆 Grand Slam -- nyert mindhárom csapatszínnel?"      ,}
+                    , React.createElement(Sec, { title: "🏆 Grand Slam -- nyert mindharom csapatszinnel?"      ,}
                       , slammers.length>0&&(
                         React.createElement('div', { style: {marginBottom:10},}
-                          , React.createElement('div', { style: {color:"#50c878",fontSize:12,marginBottom:6},}, "✅ Teljesítette:" )
+                          , React.createElement('div', { style: {color:"#50c878",fontSize:12,marginBottom:6},}, "✅ Teljesitette:" )
                           , slammers.map((p,i)=>(
                             React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:6,
                               padding:"4px 0",borderBottom:"1px solid #0a2a0a"},}
@@ -1487,7 +1487,7 @@ React.createElement(‘div’, { style: S.root,}
                           ))
                         )
                       )
-                      , slammers.length===0&&React.createElement('div', { style: {color:"#3a2810",fontSize:12,marginBottom:8},}, "Még senki sem teljesítette."   )
+                      , slammers.length===0&&React.createElement('div', { style: {color:"#3a2810",fontSize:12,marginBottom:8},}, "Meg senki sem teljesitette."   )
                       , inProgress.length>0&&(
                         React.createElement('div', null
                           , React.createElement('div', { style: {color:"#7a5a28",fontSize:12,marginBottom:6},}, "⏳ Folyamatban:" )
@@ -1510,9 +1510,9 @@ React.createElement(‘div’, { style: S.root,}
                   ));
                 })()
 
-                /* Visszavágó arány */
+                /* Visszavago arany */
                 , (()=>{
-                  // Minden játékosnál: az előző játékban veszített → következőben nyert-e?
+                  // Minden jatekosnal: az elozo jatekban veszitett → kovetkezoben nyert-e?
                   const comebacks = lb.filter(p=>p.played>=3).map(p=>{
                     const myGames = [...games].reverse().filter(g=>
                       g.assignments.some(a=>a.pid===p.id)
@@ -1536,8 +1536,8 @@ React.createElement(‘div’, { style: S.root,}
 
                   if(!comebacks.length) return null;
                   return (
-                    React.createElement(Sec, { title: "🥊 Visszavágó arány -- vereség után a következő játékban nyer-e?"         ,}
-                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Csak olyan játékok ahol az előző játékot elveszítette."
+                    React.createElement(Sec, { title: "🥊 Visszavago arany -- vereseg utan a kovetkezo jatekban nyer-e?"         ,}
+                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Csak olyan jatekok ahol az elozo jatekot elveszitette."
 
                       )
                       , comebacks.map((c,i)=>(
@@ -1551,11 +1551,11 @@ React.createElement(‘div’, { style: S.root,}
                   );
                 })()
 
-                /* Ki billenti fel az egyensúlyt */
+                /* Ki billenti fel az egyensulyt */
                 , (()=>{
                   if(games.length<4) return null;
-                  // Minden játékosnál: azokban a játékokban ahol ő játszik,
-                  // melyik csapatszín nyer szignifikánsan többet vs az összes játékban
+                  // Minden jatekosnal: azokban a jatekokban ahol o jatszik,
+                  // melyik csapatszin nyer szignifikansan tobbet vs az osszes jatekban
                   const total = games.length;
                   const globalTw = {seriff:0,bandita:0,renegat:0};
                   games.forEach(g=>{ globalTw[g.winTeam]=(globalTw[g.winTeam]||0)+1; });
@@ -1566,7 +1566,7 @@ React.createElement(‘div’, { style: S.root,}
                     myGames.forEach(g=>{ myTw[g.winTeam]=(myTw[g.winTeam]||0)+1; });
                     const n = myGames.length;
 
-                    // Melyik csapatnál a legnagyobb az eltérés a globálishoz képest?
+                    // Melyik csapatnal a legnagyobb az elteres a globalishoz kepest?
                     let maxDiff=0, tiltTeam=null;
                     Object.entries(myTw).forEach(([team,cnt])=>{
                       const myPct   = cnt/n;
@@ -1584,8 +1584,8 @@ React.createElement(‘div’, { style: S.root,}
 
                   if(!tilters.length) return null;
                   return (
-                    React.createElement(Sec, { title: "⚖️ Ki billenti fel az egyensúlyt?"     ,}
-                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Ha ez a játékos játszik, az adott csapat szignifikánsan többet nyer a globális átlaghoz képest."
+                    React.createElement(Sec, { title: "⚖️ Ki billenti fel az egyensulyt?"     ,}
+                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Ha ez a jatekos jatszik, az adott csapat szignifikansan tobbet nyer a globalis atlaghoz kepest."
 
                       )
                       , tilters.slice(0,5).map((t,i)=>(
@@ -1605,9 +1605,9 @@ React.createElement(‘div’, { style: S.root,}
                   );
                 })()
 
-                /* Legkiegyensúlyozottabb nap */
+                /* Legkiegyensulyozottabb nap */
                 , (()=>{
-                  // Napok ahol legalább 3 játék volt, és a legtöbb különböző csapat nyert
+                  // Napok ahol legalabb 3 jatek volt, es a legtobb kulonbozo csapat nyert
                   const byDay = {};
                   games.forEach(g=>{
                     if(!byDay[g.date]) byDay[g.date]={games:0,teams:{}};
@@ -1619,9 +1619,9 @@ React.createElement(‘div’, { style: S.root,}
                     .map(([date,v])=>{
                       const teamCounts = Object.values(v.teams);
                       const uniqueTeams = Object.keys(v.teams).length;
-                      // Egyensúly = minél több különböző győztes, minél kisebb a szórás
+                      // Egyensuly = minel tobb kulonbozo gyoztes, minel kisebb a szoras
                       const max = Math.max(...teamCounts);
-                      const balance = uniqueTeams*10 - max; // magasabb = egyensúlyosabb
+                      const balance = uniqueTeams*10 - max; // magasabb = egyensulyosabb
                       return {date, games:v.games, uniqueTeams, teams:v.teams, balance};
                     })
                     .sort((a,b)=>b.balance-a.balance);
@@ -1629,12 +1629,12 @@ React.createElement(‘div’, { style: S.root,}
                   if(!days.length) return null;
                   const best = days[0];
                   return (
-                    React.createElement(Sec, { title: "🎯 Legkiegyensúlyozottabb nap -- legtöbb különböző győztes csapat"       ,}
+                    React.createElement(Sec, { title: "🎯 Legkiegyensulyozottabb nap -- legtobb kulonbozo gyoztes csapat"       ,}
                       , React.createElement('div', { style: {padding:"10px 12px",background:"#0e0a05",borderRadius:6,
                         border:"1px solid #2a1808"},}
                         , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",marginBottom:8},}
                           , React.createElement('span', { style: {color:"#e8b84b",fontFamily:"'Rye',serif",fontSize:16},}, best.date)
-                          , React.createElement('span', { style: {color:"#5a3a18",fontSize:12},}, best.games, " játék" )
+                          , React.createElement('span', { style: {color:"#5a3a18",fontSize:12},}, best.games, " jatek" )
                         )
                         , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap"},}
                           , Object.entries(best.teams).map(([team,cnt])=>(
@@ -1648,7 +1648,7 @@ React.createElement(‘div’, { style: S.root,}
                         )
                       )
                       , days.length>1&&(
-                        React.createElement('div', { style: {marginTop:8,color:"#3a2810",fontSize:11},}, "Többi kiegyensúlyozott nap: "
+                        React.createElement('div', { style: {marginTop:8,color:"#3a2810",fontSize:11},}, "Tobbi kiegyensulyozott nap: "
                              , days.slice(1,3).map(d=>d.date).join(", ")
                         )
                       )
@@ -1656,7 +1656,7 @@ React.createElement(‘div’, { style: S.root,}
                   );
                 })()
 
-                /* Ki nyerte meg a legtöbb játékot seriffként */
+                /* Ki nyerte meg a legtobb jatekot seriffkent */
                 , (()=>{
                   const seriffWins = {};
                   games.forEach(g=>{
@@ -1671,7 +1671,7 @@ React.createElement(‘div’, { style: S.root,}
                   if(!rows.length) return null;
                   const max = rows[0][1];
                   return (
-                    React.createElement(Sec, { title: "🤠 Legtöbb seriff győzelem -- ki nyerte meg a legtöbb játékot seriffként?"           ,}
+                    React.createElement(Sec, { title: "🤠 Legtobb seriff gyozelem -- ki nyerte meg a legtobb jatekot seriffkent?"           ,}
                       , rows.map(([name,cnt],i)=>(
                         React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:10,
                           padding:"6px 0",borderBottom:"1px solid #1a1206"},}
@@ -1694,16 +1694,16 @@ React.createElement(‘div’, { style: S.root,}
                   );
                 })()
 
-                /* Szimmetria mutató */
+                /* Szimmetria mutato */
                 , (()=>{
                   if(players.length<2) return null;
-                  // Minden játékosnál: mennyire egyenlő a szerepek elosztása
-                  // Tökéletes szimmetria = minden szerepet egyforma arányban kapja
+                  // Minden jatekosnal: mennyire egyenlo a szerepek elosztasa
+                  // Tokeletes szimmetria = minden szerepet egyforma aranyban kapja
                   const symData = lb.filter(p=>p.played>=3).map(p=>{
                     const total = Object.values(p.roles).reduce((s,x)=>s+x,0);
                     if(total===0) return null;
                     const expected = total / Object.keys(ROLES).length;
-                    // Szórás a szerepek eloszlásában
+                    // Szoras a szerepek eloszlasaban
                     const allRoleCounts = Object.keys(ROLES).map(r=>p.roles[r]||0);
                     const variance = allRoleCounts.reduce((s,x)=>s+(x-expected)**2,0)/allRoleCounts.length;
                     const std = Math.sqrt(variance);
@@ -1715,8 +1715,8 @@ React.createElement(‘div’, { style: S.root,}
 
                   if(!symData.length) return null;
                   return (
-                    React.createElement(Sec, { title: "🎲 Szimmetria mutató -- mennyire egyenlően osztják a szerepeket?"        ,}
-                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "100% = minden szerepet egyforma arányban kapott. Minél magasabb, annál sokoldalúbb."
+                    React.createElement(Sec, { title: "🎲 Szimmetria mutato -- mennyire egyenloen osztjak a szerepeket?"        ,}
+                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "100% = minden szerepet egyforma aranyban kapott. Minel magasabb, annal sokoldalubb."
 
                       )
                       , symData.map((p,i)=>(
@@ -1742,24 +1742,24 @@ React.createElement(‘div’, { style: S.root,}
                   );
                 })()
 
-                /* Mindenki más csapaton -- chaos meccsek */
+                /* Mindenki mas csapaton -- chaos meccsek */
                 , (()=>{
-                  // Azok a meccsek ahol minden játékos különböző csapaton volt
-                  // 5 fős esetén: Seriff(1) + Helyettes(1) = seriff, 2x Bandita = bandita, 1x Renegát = renegát
-                  // "Chaos" = max különböző csapat egyszerre (mindenki más oldalon?)
-                  // Valójában: hányszor fordult elő minden lehetséges csapatszín győzelem
-                  // Inkább: hányszor volt olyan meccs ahol a seriff csapat csak 2 fős (5 fős)
-                  // Egyedi meccs-összetételek száma
+                  // Azok a meccsek ahol minden jatekos kulonbozo csapaton volt
+                  // 5 fos eseten: Seriff(1) + Helyettes(1) = seriff, 2x Bandita = bandita, 1x Renegat = renegat
+                  // "Chaos" = max kulonbozo csapat egyszerre (mindenki mas oldalon?)
+                  // Valojaban: hanyszor fordult elo minden lehetseges csapatszin gyozelem
+                  // Inkabb: hanyszor volt olyan meccs ahol a seriff csapat csak 2 fos (5 fos)
+                  // Egyedi meccs-osszetetelek szama
                   const compMap = {};
                   games.forEach(g=>{
-                    // Csapat összetétel kulcs: ki volt melyik csapaton
+                    // Csapat osszetetel kulcs: ki volt melyik csapaton
                     const teams = {seriff:[], bandita:[], renegat:[]};
                     g.assignments.forEach(a=>{
                       const t = _optionalChain([ROLES, 'access', _96 => _96[a.role], 'optionalAccess', _97 => _97.team]);
                       const name = _optionalChain([players, 'access', _98 => _98.find, 'call', _99 => _99(p=>p.id===a.pid), 'optionalAccess', _100 => _100.name]);
                       if(t&&name) teams[t].push(name);
                     });
-                    // Rendezzük hogy azonos összetétel = azonos kulcs
+                    // Rendezzuk hogy azonos osszetetel = azonos kulcs
                     const key = Object.entries(teams)
                       .map(([t,names])=>`${t}:${[...names].sort().join(",")}`)
                       .sort().join("|");
@@ -1774,8 +1774,8 @@ React.createElement(‘div’, { style: S.root,}
 
                   if(comps.length===0) return null;
                   return (
-                    React.createElement(Sec, { title: `🎰 Meccs-összetételek -- ${uniqueCount} egyedi kombináció ${games.length} meccsből`,}
-                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:10},}, "Legtöbbször előforduló összetételek:"
+                    React.createElement(Sec, { title: `🎰 Meccs-osszetetelek -- ${uniqueCount} egyedi kombinacio ${games.length} meccsbol`,}
+                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:10},}, "Legtobbszor elofordulo osszetetelek:"
 
                       )
                       , comps.slice(0,4).map((c,i)=>{
@@ -1784,7 +1784,7 @@ React.createElement(‘div’, { style: S.root,}
                           React.createElement('div', { key: i, style: {marginBottom:8,padding:"8px 10px",background:"#0e0a05",
                             borderRadius:6,border:"1px solid #2a1808"},}
                             , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",marginBottom:6},}
-                              , React.createElement('span', { style: {color:"#5a3a18",fontSize:11},}, c.count, "× lejátszva" )
+                              , React.createElement('span', { style: {color:"#5a3a18",fontSize:11},}, c.count, "× lejatszva" )
                               , React.createElement('span', { style: {color:_optionalChain([WIN_TEAMS, 'access', _101 => _101[topWinner[0]], 'optionalAccess', _102 => _102.color]),fontSize:11},}
                                 , _optionalChain([WIN_TEAMS, 'access', _103 => _103[topWinner[0]], 'optionalAccess', _104 => _104.icon]), " " , topWinner[1], "× nyerte"
                               )
@@ -1804,7 +1804,7 @@ React.createElement(‘div’, { style: S.root,}
                       })
                       , uniqueCount>4&&(
                         React.createElement('div', { style: {color:"#3a2810",fontSize:11,marginTop:4,textAlign:"center"},}, "+ "
-                           , uniqueCount-4, " további egyedi összetétel"
+                           , uniqueCount-4, " tovabbi egyedi osszetetel"
                         )
                       )
                     )
@@ -1818,42 +1818,42 @@ React.createElement(‘div’, { style: S.root,}
       )
     )
 
-    /* ══ ÚJ JÁTÉK ══ */
+    /* == UJ JATEK == */
     , view==="new"&&(
       React.createElement('div', { className: "fu",}
-        , React.createElement('h2', { style: S.sh,}, "Új Játék Rögzítése"  )
+        , React.createElement('h2', { style: S.sh,}, "Uj Jatek Rogzitese"  )
         , players.length<5
-          ? React.createElement(Empty, null, "Legalább 5 játékos szükséges."   )
+          ? React.createElement(Empty, null, "Legalabb 5 jatekos szukseges."   )
           : React.createElement(React.Fragment, null
             , React.createElement('div', { style: {display:"flex",gap:14,flexWrap:"wrap",marginBottom:17},}
               , React.createElement('div', null
-                , React.createElement('div', { style: S.label,}, "Hányan játszottak?" )
+                , React.createElement('div', { style: S.label,}, "Hanyan jatszottak?" )
                 , React.createElement('div', { style: {display:"flex",gap:8,marginTop:6},}
                   , [5,6].filter(n=>players.length>=n).map(n=>(
                     React.createElement('button', { key: n, className: "btn", onClick: ()=>{setPc(n);setAssign({});},
                       style: {padding:"7px 20px",background:pc===n?"#2a1a08":"#1a1008",
                         color:pc===n?"#e8b84b":"#6a4a20",
                         border:`1px solid ${pc===n?"#7a5020":"#3a2010"}`,borderRadius:4,fontSize:15},}
-                      , n, " fős"
+                      , n, " fos"
                     )
                   ))
                 )
               )
               , React.createElement('div', null
-                , React.createElement('div', { style: S.label,}, "Dátum")
+                , React.createElement('div', { style: S.label,}, "Datum")
                 , React.createElement('input', { type: "date", value: date, onChange: e=>setDate(e.target.value),
                   style: {background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
                     borderRadius:4,padding:"7px 11px",fontSize:14,marginTop:6},})
               )
               , React.createElement('div', null
-                , React.createElement('div', { style: S.label,}, "Körök száma (opcionális)"  )
+                , React.createElement('div', { style: S.label,}, "Korok szama (opcionalis)"  )
                 , React.createElement('input', { type: "number", min: "1", max: "99", placeholder: "pl. 12" ,
                   value: rounds, onChange: e=>setRounds(e.target.value),
                   style: {background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
                     borderRadius:4,padding:"7px 11px",fontSize:14,marginTop:6,width:90},})
               )
             )
-            , React.createElement('div', { style: S.label,}, "Szerepek kiosztása" )
+            , React.createElement('div', { style: S.label,}, "Szerepek kiosztasa" )
             , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(182px,1fr))",gap:9,marginTop:7},}
               , slots.map((role,i)=>{
                 const r=ROLES[role]; const pts=_optionalChain([ROLE_PTS, 'access', _113 => _113[role], 'optionalAccess', _114 => _114[pc]])||r.base;
@@ -1869,7 +1869,7 @@ React.createElement(‘div’, { style: S.root,}
                       style: {width:"100%",background:"#100c06",color:"#c8a060",
                         border:`1px solid ${assign[i]?r.color+"55":"#2a1808"}`,
                         borderRadius:4,padding:"6px 9px",fontSize:14},}
-                      , React.createElement('option', { value: "",}, "-- válassz --"  )
+                      , React.createElement('option', { value: "",}, "-- valassz --"  )
                       , players.map(p=>{
                         const taken=Object.entries(assign).some(([k,v])=>parseInt(k)!==i&&v===p.id);
                         return React.createElement('option', { key: p.id, value: p.id, disabled: taken,}, taken?"✗ ":"", p.name);
@@ -1897,7 +1897,7 @@ React.createElement(‘div’, { style: S.root,}
               React.createElement('div', { className: "fu", style: {marginTop:15,padding:13,border:"1px solid #3a2808",
                 borderRadius:6,background:"#0e0a05"},}
                 , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:"#6a4a18",fontSize:11,
-                  letterSpacing:2,textAlign:"center",marginBottom:9},}, "✦ PONTOK ELŐNÉZETE ✦"   )
+                  letterSpacing:2,textAlign:"center",marginBottom:9},}, "✦ PONTOK ELONEZETE ✦"   )
                 , slots.map((role,i)=>{
                   const player=players.find(x=>x.id===assign[i]);
                   const pts=calcPts(role,winner,pc);
@@ -1918,7 +1918,7 @@ React.createElement(‘div’, { style: S.root,}
                 background:"linear-gradient(180deg,#3a2208,#231504)",
                 color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,
                 fontFamily:"'Rye',serif",fontSize:16,letterSpacing:2,
-                boxShadow:"0 4px 18px #00000055",opacity:allOk?1:.4},}, "💾  Játék Mentése"
+                boxShadow:"0 4px 18px #00000055",opacity:allOk?1:.4},}, "💾  Jatek Mentese"
 
             )
           )
@@ -1926,21 +1926,21 @@ React.createElement(‘div’, { style: S.root,}
       )
     )
 
-    /* ══ JÁTÉKOSOK ══ */
+    /* == JATEKOSOK == */
     , view==="pl"&&(
       React.createElement('div', { className: "fu",}
-        , React.createElement('h2', { style: S.sh,}, "Játékosok")
+        , React.createElement('h2', { style: S.sh,}, "Jatekosok")
         , React.createElement('div', { style: {display:"flex",gap:9,marginBottom:15},}
           , React.createElement('input', { value: newName, onChange: e=>setNewName(e.target.value),
             onKeyDown: e=>e.key==="Enter"&&addPlayer(),
-            placeholder: "Játékos neve..." ,
+            placeholder: "Jatekos neve..." ,
             style: {flex:1,background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
               borderRadius:4,padding:"8px 12px",fontSize:15},})
           , React.createElement('button', { className: "btn", onClick: addPlayer,
             style: {background:"#2a1a08",color:"#e8b84b",border:"1px solid #5a3a10",
-              borderRadius:4,padding:"8px 15px",fontSize:14},}, "+ Hozzáad" )
+              borderRadius:4,padding:"8px 15px",fontSize:14},}, "+ Hozzaad" )
         )
-        , players.length===0?React.createElement(Empty, null, "Még nincsenek játékosok."  )
+        , players.length===0?React.createElement(Empty, null, "Meg nincsenek jatekosok."  )
           :players.map((p,i)=>{
             const st=lb.find(x=>x.id===p.id);
             return (
@@ -1960,11 +1960,11 @@ React.createElement(‘div’, { style: S.root,}
       )
     )
 
-    /* ══ ELŐZMÉNYEK ══ */
+    /* == ELOZMENYEK == */
     , view==="hist"&&(
       React.createElement('div', { className: "fu",}
-        , React.createElement('h2', { style: S.sh,}, "Előzmények")
-        , games.length===0?React.createElement(Empty, null, "Még nincsenek mentett játékok."   )
+        , React.createElement('h2', { style: S.sh,}, "Elozmenyek")
+        , games.length===0?React.createElement(Empty, null, "Meg nincsenek mentett jatekok."   )
           :games.map((g,gi)=>{
             const wt=WIN_TEAMS[g.winTeam];
             return (
@@ -1973,11 +1973,11 @@ React.createElement(‘div’, { style: S.root,}
                   borderLeft:`3px solid ${wt.color}55`,animationDelay:`${gi*.05}s`},}
                 , React.createElement('div', { style: {display:"flex",alignItems:"center",justifyContent:"space-between",
                   flexWrap:"wrap",gap:6,marginBottom:8},}
-                  , React.createElement('span', { style: {color:"#5a3a18",fontSize:12},}, g.date, " · "  , g.pc, " fős" )
+                  , React.createElement('span', { style: {color:"#5a3a18",fontSize:12},}, g.date, " · "  , g.pc, " fos" )
                   , React.createElement('span', { style: {color:wt.color,fontWeight:700,fontSize:13},}, wt.icon, " " , wt.label, " nyert" )
                   , React.createElement('button', { className: "btn", onClick: ()=>delGame(g.id),
                     style: {background:"#2a0a0a",color:"#c05050",border:"1px solid #5a1a1a",
-                      borderRadius:4,padding:"2px 7px",fontSize:11},}, "✕ töröl" )
+                      borderRadius:4,padding:"2px 7px",fontSize:11},}, "✕ torol" )
                 )
                 , g.assignments.map((a,ai)=>{
                   const player=players.find(x=>x.id===a.pid);
@@ -2021,7 +2021,7 @@ sh:     { fontFamily:”‘Rye’,serif”, color:”#c89030”, fontSize:18, le
 label:  { color:”#6a4a20”, fontSize:11, letterSpacing:2, textTransform:“uppercase” },
 };
 
-// ── ROOT KOMPONENS ────────────────────────────────────────────────────────────
+// – ROOT KOMPONENS ————————————————————
 function Root() {
 const apiKey = HARDCODED_KEY;
 const [roomId,   setRoomId]   = useState(localStorage.getItem(LS_ROOM)||””);
