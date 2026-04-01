@@ -317,20 +317,20 @@ function RoomScreen({apiKey, onJoin}) {
 
 
 const ROLES = {
-  seriff:    { label:"Seriff",    icon:"🤠", color:"#e8b84b", dark:"#3a2408", team:"seriff",  base:3.5 },
-  helyettes: { label:"Helyettes", icon:"⭐", color:"#c89030", dark:"#2e1c06", team:"seriff",  base:3.5 },
-  bandita:   { label:"Bandita",   icon:"💀", color:"#e05050", dark:"#380c0c", team:"bandita", base:5.0 },
-  renegat:   { label:"Renegat",   icon:"🃏", color:"#50c878", dark:"#0c3018", team:"renegat", base:10.0 },
+  seriff:    { label:"Seriff",    icon:"🤠", color:"#e8b84b", dark:"#3a2408", team:"seriff",  base:3 },
+  helyettes: { label:"Helyettes", icon:"⭐", color:"#c89030", dark:"#2e1c06", team:"seriff",  base:3 },
+  bandita:   { label:"Bandita",   icon:"💀", color:"#e05050", dark:"#380c0c", team:"bandita", base:6 },
+  renegat:   { label:"Renegat",   icon:"🃏", color:"#50c878", dark:"#0c3018", team:"renegat", base:12 },
 };
 // Szerepenkenti pontok letszam szerint (matematikailag kiegyensulyozott)
 // Varhato ertek (gyozesi% × pont) minden szerepnel ~1.5 pt/jatek
 // 5 fos: Seriff/Helyettes ~45%, Bandita ~30%, Renegat ~15%
 // 6 fos: Seriff ~45%, Helyettes ~35% (titkos, 2v4!), Bandita ~25% (2v3), Renegat ~10%
 const ROLE_PTS = {
-  seriff:    { 5: 3.5, 6: 3.5 },
-  helyettes: { 5: 3.5, 6: 4.5 },
-  bandita:   { 5: 5.0, 6: 6.0 },
-  renegat:   { 5: 10.0, 6: 15.0 },
+  seriff:    { 5: 3,  6: 3.5 },
+  helyettes: { 5: 3,  6: 3.5 },
+  bandita:   { 5: 6,  6: 7  },
+  renegat:   { 5: 12, 6: 16 },
 };
 const CONFIGS = {
   5: { slots:["seriff","helyettes","bandita","bandita","renegat"] },
