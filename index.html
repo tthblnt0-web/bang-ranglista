@@ -3,28 +3,30 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="BANG! házi ranglista — szoba alapú pontozó és statisztika rendszer"/>
   <title>BANG! Házi Ranglista</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{background:#0c0905;}
-    ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0c0905} ::-webkit-scrollbar-thumb{background:#4a2e10;border-radius:2px}
+    body{background:#0d0b07;}
+    ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-track{background:#0a0806} ::-webkit-scrollbar-thumb{background:#3a2208;border-radius:3px}
     input,select,button,textarea{font-family:'Playfair Display',Georgia,serif}
-    select option{background:#1a1008;color:#c8a060}
-    .btn{transition:all .15s;cursor:pointer;border:none}
-    .btn:hover:not(:disabled){filter:brightness(1.2);transform:translateY(-1px)}
-    .btn:active:not(:disabled){transform:translateY(0)}
-    .btn:disabled{opacity:.35;cursor:not-allowed}
-    .hov:hover{background:rgba(232,184,75,.06)!important}
-    @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes sr{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
-    @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    select option{background:#181008;color:#c0982a}
+    .btn{transition:background .2s,color .2s,border-color .2s,transform .15s,opacity .2s;cursor:pointer;border:none}
+    .btn:hover:not(:disabled){transform:translateY(-1px)}
+    .btn:active:not(:disabled){transform:translateY(1px) scale(0.98)}
+    .btn:disabled{opacity:.3;cursor:not-allowed}
+    .hov{transition:background .18s}
+    .hov:hover{background:rgba(212,168,75,.07)!important}
+    @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes sr{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
     @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    .fu{animation:fu .25s ease both}
-    .sr{animation:sr .22s ease both}
+    .fu{animation:fu .3s cubic-bezier(0.22,1,0.36,1) both}
+    .sr{animation:sr .28s cubic-bezier(0.22,1,0.36,1) both}
     .nb{position:relative}
-    .nb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#e8b84b;transform:scaleX(0);transition:transform .2s}
+    .nb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#d4a84b;transform:scaleX(0);transition:transform .2s}
     .nb.on::after{transform:scaleX(1)}
     .spin{display:inline-block;animation:spin .8s linear infinite}
   </style>
@@ -32,15 +34,27 @@
 <body>
   <div id="root"></div>
   <div id="loading" style="
-    position:fixed;inset:0;background:#111;
+    position:fixed;inset:0;
+    background:radial-gradient(ellipse 80% 60% at 50% 30%,#1c1005 0%,#0a0804 50%,#060504 100%);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    font-family:Georgia,serif;color:#f0c040;z-index:9999;
+    font-family:'Rye',Georgia,serif;color:#d4a84b;z-index:9999;
   ">
-    <div style="font-size:56px;letter-spacing:8px">BANG!</div>
-    <div style="font-size:14px;color:#aaa;margin-top:14px;letter-spacing:3px">BETÖLTÉS...</div>
-    <div style="width:36px;height:36px;border:3px solid #444;border-top-color:#f0c040;
-      border-radius:50%;animation:spin2 1s linear infinite;margin-top:18px"></div>
-    <style>@keyframes spin2{to{transform:rotate(360deg)}}</style>
+    <div style="position:absolute;inset:0;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22 opacity=%220.04%22/></svg>');pointer-events:none;"></div>
+    <div style="position:relative;text-align:center;">
+      <div style="font-size:11px;letter-spacing:8px;color:#4a2e10;margin-bottom:12px;opacity:0.8">✦ ✦ ✦</div>
+      <div style="font-size:72px;letter-spacing:10px;line-height:1;text-shadow:0 0 80px rgba(212,168,75,0.35),0 0 20px rgba(212,168,75,0.15),0 2px 0 #000;animation:ldPulse 2s ease-in-out infinite">BANG!</div>
+      <div style="font-size:10px;color:#4a3018;margin-top:12px;letter-spacing:6px">BETÖLTÉS</div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:18px">
+        <div style="width:6px;height:6px;border-radius:50%;background:#4a2e10;animation:ldDot 1.2s ease-in-out infinite;animation-delay:0s"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#4a2e10;animation:ldDot 1.2s ease-in-out infinite;animation-delay:0.2s"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#4a2e10;animation:ldDot 1.2s ease-in-out infinite;animation-delay:0.4s"></div>
+      </div>
+    </div>
+    <style>
+      @keyframes spin2{to{transform:rotate(360deg)}}
+      @keyframes ldPulse{0%,100%{text-shadow:0 0 80px rgba(212,168,75,0.35),0 0 20px rgba(212,168,75,0.15),0 2px 0 #000}50%{text-shadow:0 0 120px rgba(212,168,75,0.5),0 0 40px rgba(212,168,75,0.25),0 2px 0 #000}}
+      @keyframes ldDot{0%,80%,100%{opacity:0.2;transform:scale(1)}40%{opacity:1;transform:scale(1.4);background:#d4a84b}}
+    </style>
   </div>
   <div id="error-box" style="display:none;position:fixed;inset:0;background:#111;
     color:#f88;padding:20px;font-family:monospace;font-size:12px;z-index:99999;
@@ -117,21 +131,21 @@ function SetupScreen({onDone}) {
 
   return (
     React.createElement('div', { style: {minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",
-      background:"radial-gradient(ellipse at 50% 0%,#1a0e04 0%,#0c0905 100%)",padding:20},}
+      background:"radial-gradient(ellipse 100% 70% at 50% 0%,#1c1208 0%,#0d0b07 45%,#0a0806 100%)",padding:20},}
       , React.createElement('div', { style: {maxWidth:440,width:"100%"},}
         , React.createElement('div', { style: {textAlign:"center",marginBottom:28},}
-          , React.createElement('div', { style: {color:"#3a2410",fontSize:11,letterSpacing:7,marginBottom:4},}, "-- ✦ ✦ ✦ --"    )
-          , React.createElement('h1', { style: {fontFamily:"'Rye',serif",fontSize:72,color:"#e8b84b",letterSpacing:8,
-            textShadow:"0 0 50px #e8b84b2a,0 2px 0 #000",lineHeight:1},}, "BANG!")
-          , React.createElement('p', { style: {color:"#5a3a18",fontSize:12,letterSpacing:6,marginTop:4},}, "HAZI RANGLISTA" )
+          , React.createElement('div', { style: {color:"#3e2c12",fontSize:11,letterSpacing:7,marginBottom:4},}, "── ✦ ──"    )
+          , React.createElement('h1', { style: {fontFamily:"'Rye',serif",fontSize:72,color:"#d4a84b",letterSpacing:8,
+            textShadow:"0 0 50px #d4a84b20,0 2px 0 #000",lineHeight:1},}, "BANG!")
+          , React.createElement('p', { style: {color:"#5c3e1a",fontSize:12,letterSpacing:6,marginTop:4},}, "HAZI RANGLISTA" )
         )
 
-        , React.createElement('div', { style: {padding:24,border:"1px solid #3a2010",borderRadius:10,background:"#100c06"},}
+        , React.createElement('div', { style: {padding:24,border:"1px solid #2e1e0c",borderRadius:10,background:"#141008"},}
           , React.createElement('div', { style: {color:"#c89030",fontWeight:700,fontSize:16,marginBottom:6},}, "🔑 JSONBin API kulcs"   )
-          , React.createElement('div', { style: {color:"#5a3a18",fontSize:13,lineHeight:1.8,marginBottom:16},}, "Az adatok biztonsagos tarolasahoz szukseges egy ingyenes JSONBin fiok."
+          , React.createElement('div', { style: {color:"#5c3e1a",fontSize:13,lineHeight:1.8,marginBottom:16},}, "Az adatok biztonsagos tarolasahoz szukseges egy ingyenes JSONBin fiok."
                     , React.createElement('br', null)
             , React.createElement('a', { href: "https://jsonbin.io", target: "_blank",
-              style: {color:"#e8b84b",textDecoration:"none"},}, "jsonbin.io"), " → Regisztralj → API Keys → Master Key"
+              style: {color:"#d4a84b",textDecoration:"none"},}, "jsonbin.io"), " → Regisztralj → API Keys → Master Key"
           )
           , React.createElement('input', {
             type: "password",
@@ -139,17 +153,17 @@ function SetupScreen({onDone}) {
             onChange: e=>setKey(e.target.value),
             onKeyDown: e=>e.key==="Enter"&&verify(),
             placeholder: "$2a$10$...",
-            style: {width:"100%",background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
-              borderRadius:5,padding:"10px 14px",fontSize:15,marginBottom:10,outline:"none"},}
+            style: {width:"100%",background:"#181006",color:"#c8a458",border:"1px solid #2e1e0c",
+              borderRadius:6,padding:"10px 14px",fontSize:15,marginBottom:10,outline:"none"},}
           )
           , err&&React.createElement('div', { style: {color:"#f08080",fontSize:13,marginBottom:10},}, "⚠️ " , err)
           , React.createElement('button', { className: "btn", onClick: verify,
             style: {width:"100%",padding:"12px",background:"linear-gradient(180deg,#3a2208,#231504)",
-              color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,
+              color:"#d4a84b",border:"1px solid #5a3810",borderRadius:8,
               fontFamily:"'Rye',serif",fontSize:16,letterSpacing:2},}, "Tovabb →"
 
           )
-          , React.createElement('div', { style: {marginTop:12,fontSize:11,color:"#3a2010",textAlign:"center"},}, "A kulcs csak a te bongeszodben tarolodik, sehova sem kerul feltoltesre."
+          , React.createElement('div', { style: {marginTop:12,fontSize:11,color:"#3c2410",textAlign:"center"},}, "A kulcs csak a te bongeszodben tarolodik, sehova sem kerul feltoltesre."
 
           )
         )
@@ -208,31 +222,34 @@ function RoomScreen({apiKey, onJoin}) {
 
   return (
     React.createElement('div', { style: {minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",
-      background:"radial-gradient(ellipse at 50% 0%,#1a0e04 0%,#0c0905 100%)",padding:20},}
+      background:"radial-gradient(ellipse 100% 70% at 50% 0%,#1c1208 0%,#0d0b07 45%,#0a0806 100%)",padding:20},}
       , React.createElement('div', { style: {maxWidth:440,width:"100%"},}
         , React.createElement('div', { style: {textAlign:"center",marginBottom:24},}
-          , React.createElement('h1', { style: {fontFamily:"'Rye',serif",fontSize:56,color:"#e8b84b",letterSpacing:6,
-            textShadow:"0 0 50px #e8b84b2a",lineHeight:1},}, "BANG!")
-          , React.createElement('p', { style: {color:"#5a3a18",fontSize:11,letterSpacing:5,marginTop:3},}, "HAZI RANGLISTA" )
+          , React.createElement('div', { style: {color:"#3d2812",fontSize:11,letterSpacing:8,marginBottom:10,opacity:.7},}, "── ✦ ──"    )
+          , React.createElement('h1', { style: {fontFamily:"'Rye',serif",fontSize:58,color:"#d4a84b",letterSpacing:7,
+            textShadow:"0 0 80px rgba(212,168,75,0.2),0 2px 0 #000",lineHeight:1},}, "BANG!")
+          , React.createElement('p', { style: {color:"#5c3e1a",fontSize:10,letterSpacing:6,marginTop:4,fontWeight:600},}, "HAZI RANGLISTA" )
         )
 
         , !mode && !created && (
-          React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:12},}
+          React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:10},}
             , React.createElement('button', { className: "btn", onClick: ()=>setMode("create"),
-              style: {padding:"16px",background:"linear-gradient(180deg,#1a4018,#0e2a0e)",
-                color:"#50c878",border:"1px solid #3a7030",borderRadius:8,
-                fontFamily:"'Rye',serif",fontSize:18,letterSpacing:2},}, "🆕 Uj szoba letrehozasa"
+              style: {padding:"18px",background:"linear-gradient(180deg,#1c4a1a,#102e0e)",
+                color:"#50c878",border:"1px solid #2a6025",borderRadius:10,
+                fontFamily:"'Rye',serif",fontSize:17,letterSpacing:2,
+                boxShadow:"0 4px 20px rgba(80,200,120,0.08)"},}, "🆕 Uj szoba letrehozasa"
 
             )
             , React.createElement('button', { className: "btn", onClick: ()=>setMode("join"),
-              style: {padding:"16px",background:"linear-gradient(180deg,#2a1a08,#1a0e04)",
-                color:"#e8b84b",border:"1px solid #6a4010",borderRadius:8,
-                fontFamily:"'Rye',serif",fontSize:18,letterSpacing:2},}, "🔑 Csatlakozas szoba kulccsal"
+              style: {padding:"18px",background:"linear-gradient(180deg,#2e1c08,#1c1005)",
+                color:"#d4a84b",border:"1px solid #5a3a10",borderRadius:10,
+                fontFamily:"'Rye',serif",fontSize:17,letterSpacing:2,
+                boxShadow:"0 4px 20px rgba(212,168,75,0.06)"},}, "🔑 Csatlakozas szoba kulccsal"
 
             )
             , React.createElement('button', { className: "btn", onClick: resetKey,
-              style: {padding:"8px",background:"transparent",color:"#3a2010",
-                border:"1px solid #2a1808",borderRadius:6,fontSize:12},}, "← Mas API kulcs megadasa"
+              style: {padding:"8px",background:"transparent",color:"#3c2410",
+                border:"1px solid #201508",borderRadius:6,fontSize:12},}, "← Mas API kulcs megadasa"
 
             )
           )
@@ -244,16 +261,16 @@ function RoomScreen({apiKey, onJoin}) {
             , React.createElement('input', { value: roomName, onChange: e=>setRoomName(e.target.value),
               onKeyDown: e=>e.key==="Enter"&&createRoom(),
               placeholder: "Szoba neve (pl. Pali csapata)"    ,
-              style: {width:"100%",background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
-                borderRadius:5,padding:"10px 14px",fontSize:15,marginBottom:10,outline:"none"},})
+              style: {width:"100%",background:"#181006",color:"#c8a458",border:"1px solid #2e1e0c",
+                borderRadius:6,padding:"10px 14px",fontSize:15,marginBottom:10,outline:"none"},})
             , err&&React.createElement('div', { style: {color:"#f08080",fontSize:13,marginBottom:10},}, "⚠️ " , err)
             , React.createElement('div', { style: {display:"flex",gap:8},}
               , React.createElement('button', { className: "btn", onClick: ()=>{setMode("");setErr("");},
-                style: {flex:1,padding:"10px",background:"#1a1008",color:"#6a4a20",
-                  border:"1px solid #2a1808",borderRadius:5,fontSize:14},}, "← Vissza" )
+                style: {flex:1,padding:"10px",background:"#181006",color:"#6a4820",
+                  border:"1px solid #251a0c",borderRadius:6,fontSize:14},}, "← Vissza" )
               , React.createElement('button', { className: "btn", onClick: createRoom, disabled: loading,
                 style: {flex:2,padding:"10px",background:"linear-gradient(180deg,#1a4018,#0e2a0e)",
-                  color:"#50c878",border:"1px solid #3a7030",borderRadius:5,fontSize:15,fontWeight:700},}
+                  color:"#50c878",border:"1px solid #3a7030",borderRadius:6,fontSize:15,fontWeight:700},}
                 , loading?React.createElement('span', { className: "spin",}, "⟳"):"Letrehozas"
               )
             )
@@ -279,7 +296,7 @@ function RoomScreen({apiKey, onJoin}) {
             )
             , React.createElement('button', { className: "btn", onClick: enterCreated,
               style: {width:"100%",padding:"12px",background:"linear-gradient(180deg,#3a2208,#231504)",
-                color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,
+                color:"#d4a84b",border:"1px solid #5a3810",borderRadius:8,
                 fontFamily:"'Rye',serif",fontSize:17,letterSpacing:2},}, "Belepes a szobaba →"
 
             )
@@ -287,22 +304,22 @@ function RoomScreen({apiKey, onJoin}) {
         )
 
         , mode==="join" && (
-          React.createElement('div', { style: {padding:22,border:"1px solid #3a2010",borderRadius:10,background:"#100c06"},}
-            , React.createElement('div', { style: {color:"#e8b84b",fontWeight:700,fontSize:16,marginBottom:12},}, "🔑 Szoba kulcs"  )
+          React.createElement('div', { style: {padding:22,border:"1px solid #2e1e0c",borderRadius:10,background:"#141008"},}
+            , React.createElement('div', { style: {color:"#d4a84b",fontWeight:700,fontSize:16,marginBottom:12},}, "🔑 Szoba kulcs"  )
             , React.createElement('input', { value: roomKey, onChange: e=>setRoomKey(e.target.value),
               onKeyDown: e=>e.key==="Enter"&&joinRoom(),
               placeholder: "Masold be a szoba kulcsat..."    ,
-              style: {width:"100%",background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
-                borderRadius:5,padding:"10px 14px",fontSize:14,marginBottom:10,outline:"none",
+              style: {width:"100%",background:"#181006",color:"#c8a458",border:"1px solid #2e1e0c",
+                borderRadius:6,padding:"10px 14px",fontSize:14,marginBottom:10,outline:"none",
                 fontFamily:"monospace"},})
             , err&&React.createElement('div', { style: {color:"#f08080",fontSize:13,marginBottom:10},}, "⚠️ " , err)
             , React.createElement('div', { style: {display:"flex",gap:8},}
               , React.createElement('button', { className: "btn", onClick: ()=>{setMode("");setErr("");},
-                style: {flex:1,padding:"10px",background:"#1a1008",color:"#6a4a20",
-                  border:"1px solid #2a1808",borderRadius:5,fontSize:14},}, "← Vissza" )
+                style: {flex:1,padding:"10px",background:"#181006",color:"#6a4820",
+                  border:"1px solid #251a0c",borderRadius:6,fontSize:14},}, "← Vissza" )
               , React.createElement('button', { className: "btn", onClick: joinRoom, disabled: loading,
                 style: {flex:2,padding:"10px",background:"linear-gradient(180deg,#2a1a08,#1a0e04)",
-                  color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,fontSize:15,fontWeight:700},}
+                  color:"#d4a84b",border:"1px solid #6a4010",borderRadius:6,fontSize:15,fontWeight:700},}
                 , loading?React.createElement('span', { className: "spin",}, "⟳"):"Csatlakozas"
               )
             )
@@ -317,34 +334,42 @@ function RoomScreen({apiKey, onJoin}) {
 
 
 const ROLES = {
-  seriff:    { label:"Seriff",    icon:"🤠", color:"#e8b84b", dark:"#3a2408", team:"seriff",  base:3 },
-  helyettes: { label:"Helyettes", icon:"⭐", color:"#c89030", dark:"#2e1c06", team:"seriff",  base:3 },
-  bandita:   { label:"Bandita",   icon:"💀", color:"#e05050", dark:"#380c0c", team:"bandita", base:6 },
-  renegat:   { label:"Renegat",   icon:"🃏", color:"#50c878", dark:"#0c3018", team:"renegat", base:12 },
+  seriff:    { label:"Seriff",    icon:"🤠", color:"#d4a84b", dark:"#3a2408", team:"seriff",  base:5 },
+  helyettes: { label:"Helyettes", icon:"⭐", color:"#c89030", dark:"#2e1c06", team:"seriff",  base:5 },
+  bandita:   { label:"Bandita",   icon:"💀", color:"#e05050", dark:"#380c0c", team:"bandita", base:10 },
+  renegat:   { label:"Renegat",   icon:"🃏", color:"#50c878", dark:"#0c3018", team:"renegat", base:15 },
 };
-// Szerepenkenti pontok letszam szerint (matematikailag kiegyensulyozott)
-// Varhato ertek (gyozesi% × pont) minden szerepnel ~1.5 pt/jatek
-// 5 fos: Seriff/Helyettes ~45%, Bandita ~30%, Renegat ~15%
-// 6 fos: Seriff ~45%, Helyettes ~35% (titkos, 2v4!), Bandita ~25% (2v3), Renegat ~10%
+// Vigaszpont rendszer (2025) -- varhato ertek ~3.3 pt/jatek minden szerepnel
+// Statisztika alapja: Seriff 81%, Bandita 19%, Renegat 0% (16 meccs)
+// Seriff/Helyettes: 5 pt gyozelemert, 0 pt vereseert
+// Bandita:          10 pt gyozelemert, +1 pt vereseert (vigasz)
+// Renegat:          15 pt gyozelemert, +2 pt vereseert (vigasz)
 const ROLE_PTS = {
-  seriff:    { 5: 3,  6: 3.5 },
-  helyettes: { 5: 3,  6: 3.5 },
-  bandita:   { 5: 6,  6: 7  },
-  renegat:   { 5: 12, 6: 16 },
+  seriff:    { win: 5,  lose: 0 },
+  helyettes: { win: 5,  lose: 0 },
+  bandita:   { win: 10, lose: 1 },
+  renegat:   { win: 15, lose: 2 },
 };
 const CONFIGS = {
   5: { slots:["seriff","helyettes","bandita","bandita","renegat"] },
   6: { slots:["seriff","helyettes","helyettes","bandita","bandita","renegat"] },
 };
 const WIN_TEAMS = {
-  seriff:  { label:"Seriff csapata", icon:"🤠", color:"#e8b84b" },
+  seriff:  { label:"Seriff csapata", icon:"🤠", color:"#d4a84b" },
   bandita: { label:"Banditak",       icon:"💀", color:"#e05050" },
   renegat: { label:"Renegat",        icon:"🃏", color:"#50c878" },
 };
 
 function calcPts(role, winTeam, pc) {
-  const r = ROLES[role]; if (!r || r.team !== winTeam) return 0;
-  return _optionalChain([ROLE_PTS, 'access', _9 => _9[role], 'optionalAccess', _10 => _10[pc]]) || r.base;
+  const r = ROLES[role]; if (!r) return 0;
+  const pts = ROLE_PTS[role];
+  if (!pts) return 0;
+  const won = r.team === winTeam;
+  return won ? pts.win : (pts.lose || 0);
+}
+
+function isWinner(role, winTeam) {
+  return _optionalChain([ROLES, 'access', _iw => _iw[role], 'optionalAccess', _iw2 => _iw2.team]) === winTeam;
 }
 
 function buildLB(players, games) {
@@ -363,7 +388,7 @@ function buildLB(players, games) {
     g.assignments.forEach(a => {
       const st = s[a.pid]; if (!st) return;
       const pts = calcPts(a.role, g.winTeam, g.pc);
-      const won = pts > 0;
+      const won = _optionalChain([ROLES, 'access', _13b => _13b[a.role], 'optionalAccess', _14b => _14b.team]) === g.winTeam;
       st.pts += pts; st.played++;
       if (won) st.wins++;
       st.roles[a.role] = (st.roles[a.role]||0) + 1;
@@ -397,21 +422,22 @@ function buildLB(players, games) {
     [...games].reverse().forEach(g => {
       const a = g.assignments.find(x=>x.pid===p.id); if (!a) return;
       const pts = calcPts(a.role,g.winTeam,g.pc);
+      const won = isWinner(a.role, g.winTeam);
       cumPts += pts;
-      s[p.id].scoreHistory.push({date:g.date, pts, cumPts});
+      s[p.id].scoreHistory.push({date:g.date, pts, cumPts, won});
     });
     // Streak: legujabb jatektol visszafele (games[0] = legujabb)
     let streak=0, maxW=0, maxL=0, cur=0, curL=0;
     for (const g of games) {
       const a = g.assignments.find(x=>x.pid===p.id); if (!a) continue;
-      const won = calcPts(a.role,g.winTeam,g.pc) > 0;
+      const won = _optionalChain([ROLES, 'access', _16b => _16b[a.role], 'optionalAccess', _17b => _17b.team]) === g.winTeam;
       if (won) { cur++; maxW=Math.max(maxW,cur); curL=0; }
       else     { curL++; maxL=Math.max(maxL,curL); cur=0; }
     }
     // Jelenlegi sorozat: legujabbtol az elso megszakadasig (nem jatszott meccsek atugorva)
     for (const g of games) {
       const a = g.assignments.find(x=>x.pid===p.id); if (!a) continue;
-      const won = calcPts(a.role,g.winTeam,g.pc) > 0;
+      const won = _optionalChain([ROLES, 'access', _18b => _18b[a.role], 'optionalAccess', _19b => _19b.team]) === g.winTeam;
       if (won) streak++;
       else break;
     }
@@ -423,38 +449,39 @@ function buildLB(players, games) {
 function Bar({ won, played, color }) {
   const pct = played>0 ? Math.round(won/played*100) : 0;
   return (
-    React.createElement('div', { style: {display:"flex",alignItems:"center",gap:7,flex:1},}
-      , React.createElement('div', { style: {flex:1,height:5,background:"#1a1208",borderRadius:3,overflow:"hidden"},}
-        , React.createElement('div', { style: {width:`${pct}%`,height:"100%",background:color,borderRadius:3},})
+    React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8,flex:1},}
+      , React.createElement('div', { style: {flex:1,height:6,background:"#1e1408",borderRadius:4,overflow:"hidden"},}
+        , React.createElement('div', { style: {width:`${pct}%`,height:"100%",background:color,borderRadius:4,transition:"width .4s cubic-bezier(0.22,1,0.36,1)"},})
       )
-      , React.createElement('span', { style: {fontSize:12,color,minWidth:30,textAlign:"right",fontWeight:700},}, pct, "%")
+      , React.createElement('span', { style: {fontSize:12,color,minWidth:32,textAlign:"right",fontWeight:700,fontVariantNumeric:"tabular-nums"},}, pct, "%")
     )
   );
 }
-function Badge({ label, val, sub, color="#e8b84b" }) {
+function Badge({ label, val, sub, color="#d4a84b", large=false }) {
   return (
-    React.createElement('div', { style: {textAlign:"center",padding:"8px 10px",background:"#0e0a05",borderRadius:6,
-      border:"1px solid #2a1808",flex:1,minWidth:62},}
-      , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:21,color,lineHeight:1},}, val)
-      , sub&&React.createElement('div', { style: {fontSize:10,color:"#5a4020",marginTop:1},}, sub)
-      , React.createElement('div', { style: {fontSize:10,color:"#3a2a10",marginTop:3,letterSpacing:1,textTransform:"uppercase"},}, label)
+    React.createElement('div', { style: {textAlign:"center",padding:large?"14px 20px":"10px 14px",background:"#0f0d08",borderRadius:8,
+      border:"1px solid #261a0c",transition:"border-color .2s"},}
+      , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:large?28:22,color,lineHeight:1,fontVariantNumeric:"tabular-nums"},}, val)
+      , sub&&React.createElement('div', { style: {fontSize:10,color:"#4e3a1a",marginTop:3},}, sub)
+      , React.createElement('div', { style: {fontSize:9,color:"#3e2c12",marginTop:large?6:4,letterSpacing:1.5,textTransform:"uppercase",fontWeight:600},}, label)
     )
   );
 }
-function Sec({ title, children }) {
+function Sec({ title, children, tight=false }) {
   return (
-    React.createElement('div', { style: {marginBottom:11,padding:11,background:"#0c0a06",borderRadius:5,border:"1px solid #1e1208"},}
-      , React.createElement('div', { style: {color:"#4a2e10",fontSize:10,letterSpacing:2,textTransform:"uppercase",marginBottom:8},}, title)
+    React.createElement('div', { style: {marginBottom:tight?8:16,padding:"12px 14px",background:"#0a0806",borderRadius:8,border:"1px solid #1e1408"},}
+      , React.createElement('div', { style: {color:"#3e2c12",fontSize:9,letterSpacing:3,textTransform:"uppercase",marginBottom:10,fontWeight:700},}, title)
       , children
     )
   );
 }
-function Row({ children }) {
-  return React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:"1px solid #1a1206"},}, children);
+function Row({ children, last=false }) {
+  return React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8,padding:"7px 0",
+    borderBottom:last?"none":"1px solid #181208"},}, children);
 }
 function Empty({ children }) {
-  return React.createElement('div', { style: {textAlign:"center",color:"#5a3a18",padding:"34px 14px",lineHeight:2,
-    fontSize:14,border:"1px dashed #2a1808",borderRadius:6},}, children);
+  return React.createElement('div', { style: {textAlign:"center",color:"#5c3e1a",padding:"48px 20px",lineHeight:2.4,
+    fontSize:14,border:"1px dashed #251a0c",borderRadius:8,background:"#0a0806"},}, children);
 }
 
 function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
@@ -564,33 +591,36 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
   return (
     React.createElement('div', { style: S.root,}
       , React.createElement('style', null, CSS)
+      , React.createElement('div', { style: {position:"fixed",inset:0,pointerEvents:"none",zIndex:0,opacity:.03,backgroundImage:"url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%224%22 stitchTiles=%22stitch%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22/></svg>')"},})
 
       , toast&&(
-        React.createElement('div', { style: {position:"fixed",top:14,left:"50%",transform:"translateX(-50%)",
-          background:toast.err?"#250808":"#081a08",border:`1px solid ${toast.err?"#8b2020":"#1a6a1a"}`,
-          color:toast.err?"#f08080":"#80c880",padding:"9px 20px",borderRadius:6,
-          fontFamily:"'Playfair Display',serif",fontSize:14,zIndex:9999,
-          boxShadow:"0 6px 24px #000c",animation:"ti .2s ease both",whiteSpace:"nowrap"},}
+        React.createElement('div', { style: {position:"fixed",top:16,left:"50%",transform:"translateX(-50%)",
+          background:toast.err?"#1c0808":"#091509",border:`1px solid ${toast.err?"#7a2020":"#1a5a1a"}`,
+          color:toast.err?"#e08080":"#70be70",padding:"10px 22px",borderRadius:20,
+          fontFamily:"'Playfair Display',serif",fontSize:13,zIndex:9999,
+          boxShadow:`0 8px 32px #000c, 0 0 0 1px ${toast.err?"#7a202033":"#1a5a1a33"}`,
+          animation:"ti .25s cubic-bezier(0.22,1,0.36,1) both",whiteSpace:"nowrap",letterSpacing:.3},}
           , toast.msg
         )
       )
 
       , React.createElement('header', { style: S.hdr,}
-        , React.createElement('div', { style: S.deco,}, "-- ✦ ✦ ✦ --"    )
+        , React.createElement('div', { style: S.deco,}, "── ✦ ──"    )
         , React.createElement('h1', { style: S.title,}, "BANG!")
         , React.createElement('p', { style: S.sub,}, "H A Z I   R A N G L I S T A"             )
-        , roomName&&React.createElement('div', { style: {marginTop:4,fontSize:11,color:"#5a3a18",letterSpacing:2},}, "🏠 "
+        , roomName&&React.createElement('div', { style: {marginTop:5,fontSize:11,color:"#5c3e1a",letterSpacing:2},}, "🏠 "
            , roomName
         )
-        , React.createElement('div', { style: S.deco,}, "-- ✦ ✦ ✦ --"    )
-        , React.createElement('div', { style: {marginTop:7,display:"flex",alignItems:"center",justifyContent:"center",gap:8},}
-          , React.createElement('span', { style: {fontSize:11,letterSpacing:1,color:
-            syncStatus==="ok"?"#3a6a3a":syncStatus==="err"?"#6a2020":syncStatus==="saving"?"#6a5a20":"#3a2a10"},}
-            , syncStatus==="saving"?"⏳ Mentes...":syncStatus==="ok"?"✅ Szinkronizalva":syncStatus==="err"?"⚠️ Hiba":"☁️ Szinkronizalva"
+        , React.createElement('div', { style: S.deco,}, "── ✦ ──"    )
+        , React.createElement('div', { style: {marginTop:8,display:"flex",alignItems:"center",justifyContent:"center",gap:8},}
+          , React.createElement('span', { style: {fontSize:10,letterSpacing:1.5,color:
+            syncStatus==="ok"?"#3a6a3a":syncStatus==="err"?"#7a2020":syncStatus==="saving"?"#6a5820":"#3a2a10",
+            fontWeight:600,textTransform:"uppercase"},}
+            , syncStatus==="saving"?"⏳ Mentés...":syncStatus==="ok"?"✅ Szinkronizálva":syncStatus==="err"?"⚠️ Hiba":"☁️ Szinkronizálva"
           )
           , React.createElement('button', { className: "btn", onClick: doSync,
-            style: {fontSize:11,color:"#5a3a18",background:"transparent",border:"1px solid #2a1808",
-              borderRadius:4,padding:"2px 8px",cursor:"pointer"},}, "🔄"
+            style: {fontSize:13,color:"#5c3e1a",background:"transparent",border:"1px solid #251a0c",
+              borderRadius:6,padding:"5px 10px",minWidth:36,minHeight:32,lineHeight:1},}, "🔄"
 
           )
         )
@@ -601,12 +631,14 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
           {k:"new",l:"🃏 Uj Jatek"},{k:"pl",l:"👥 Jatekosok"},
           {k:"hist",l:"📜 Elozmenyek"}
         ].map(({k,l})=>(
-          React.createElement('button', { key: k, className: `btn nb${view===k?" on":""}`,
+          React.createElement('button', { key: k, className: "btn",
             onClick: ()=>setView(k),
-            style: {...S.navBtn,color:view===k?"#e8b84b":"#7a5a28",},}, l)
+            style: {...S.navBtn,color:view===k?"#d4a84b":"#7a5625",
+              background:view===k?"rgba(212,168,75,0.1)":"transparent",
+              fontWeight:view===k?600:400},}, l)
         ))
         , React.createElement('button', { className: "btn", onClick: ()=>{if(window.confirm("Kilepsz a szobabol?")) onLeaveRoom();},
-          style: {...S.navBtn,color:"#4a2010"},}, "🚪 Kilepes" )
+          style: {...S.navBtn,color:"#5a2e10",borderRadius:20},}, "🚪 Kilepes" )
       )
 
       , React.createElement('main', { style: S.main,}
@@ -619,15 +651,18 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
               ? React.createElement(Empty, null, "Adj hozza jatekosokat, majd rogzits egy jatekot."      )
               : lb.map((p,i)=>{
                 const isExp=expanded===p.id;
-                const bc=["#e8b84b","#b0b0b0","#c07830"][i]||"#2a1808";
+                const bc=["#d4a84b","#b0b0b0","#c07830"][i]||"#251a0c";
                 const wr=p.played>0?Math.round(p.wins/p.played*100):0;
                 return (
-                  React.createElement('div', { key: p.id, style: {marginBottom:5},}
+                  React.createElement('div', { key: p.id, style: {marginBottom:i<3?8:6},}
                     , React.createElement('div', { className: "hov sr" , onClick: ()=>setExpanded(isExp?null:p.id),
-                      style: {display:"flex",alignItems:"center",gap:10,padding:"11px 13px",
-                        borderRadius:isExp?"6px 6px 0 0":"6px",
-                        background:isExp?"#181008":"#100c06",
-                        borderLeft:`3px solid ${bc}`,cursor:"pointer",
+                      style: {display:"flex",alignItems:"center",gap:12,
+                        padding:i<3?"15px 16px":"12px 15px",
+                        borderRadius:isExp?"8px 8px 0 0":"8px",
+                        background:isExp?"#1a1209":"#141008",
+                        border:`1px solid ${isExp?"#3a2510":i===0?"rgba(212,168,75,0.2)":i===1?"rgba(180,180,180,0.12)":i===2?"rgba(192,120,48,0.15)":"#221608"}`,
+                        borderBottom:isExp?"none":"",
+                        cursor:"pointer",
                         animationDelay:`${i*.06}s`},}
                       , React.createElement('div', { style: {width:26,textAlign:"center",flexShrink:0},}
                         , i<3?React.createElement('span', { style: {fontSize:20},}, medals[i])
@@ -635,8 +670,8 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       )
                       , React.createElement('div', { style: {flex:1},}
                         , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6},}
-                          , React.createElement('span', { style: {fontSize:17,color:"#d0a860",fontWeight:700},}, p.name)
-                          , p.streak>=3&&React.createElement('span', { style: {fontSize:10,background:"#3a1a08",color:"#e8b84b",
+                          , React.createElement('span', { style: {fontSize:17,color:"#d4a84b",fontWeight:700},}, p.name)
+                          , p.streak>=3&&React.createElement('span', { style: {fontSize:10,background:"#3a1a08",color:"#d4a84b",
                             padding:"1px 5px",borderRadius:10,border:"1px solid #5a3010"},}, "🔥", p.streak)
                         )
                         , React.createElement('div', { style: {display:"flex",gap:4,flexWrap:"wrap",marginTop:3},}
@@ -650,21 +685,21 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                         )
                       )
                       , React.createElement('div', { style: {textAlign:"right",flexShrink:0},}
-                        , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:20,color:"#e8b84b",lineHeight:1},}
+                        , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:20,color:"#d4a84b",lineHeight:1},}
                           , p.pts.toFixed(1), React.createElement('span', { style: {fontSize:10,color:"#6a4a20"},}, " pt" )
                         )
-                        , React.createElement('div', { style: {fontSize:11,color:"#4a3018",marginTop:2},}, wr, "% · "  , p.wins, "/", p.played)
+                        , React.createElement('div', { style: {fontSize:11,color:"#4e3418",marginTop:2},}, wr, "% · "  , p.wins, "/", p.played)
                       )
-                      , React.createElement('div', { style: {color:"#3a2810",fontSize:11,marginLeft:2},}, isExp?"▲":"▼")
+                      , React.createElement('div', { style: {color:"#3e2c12",fontSize:11,marginLeft:2},}, isExp?"▲":"▼")
                     )
                     , isExp&&(
-                      React.createElement('div', { style: {background:"#130e06",border:"1px solid #2a1808",borderTop:"none",
-                        borderRadius:"0 0 6px 6px",padding:13},}
-                        , React.createElement('div', { style: {display:"flex",gap:7,flexWrap:"wrap",marginBottom:11},}
-                          , React.createElement(Badge, { label: "Pontszam",  val: p.pts.toFixed(1), color: "#e8b84b",})
+                      React.createElement('div', { style: {background:"#141008",border:"1px solid #3a2510",borderTop:"none",
+                        borderRadius:"0 0 8px 8px",padding:"16px 16px 12px"},}
+                        , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",marginBottom:16},}
+                          , React.createElement(Badge, { label: "Pontszam",  val: p.pts.toFixed(1), color: "#d4a84b", large:true})
                           , React.createElement(Badge, { label: "Gy. arany" , val: `${wr}%`, sub: `${p.wins}/${p.played}`, color: wr>=50?"#50c878":"#e05050",})
                           , React.createElement(Badge, { label: "Max sor." ,  val: p.maxStreak, color: "#c89030",})
-                          , p.streak>0&&React.createElement(Badge, { label: "Jelenlegi", val: `${p.streak}🔥`, color: "#e8b84b",})
+                          , p.streak>0&&React.createElement(Badge, { label: "Jelenlegi", val: `${p.streak}🔥`, color: "#d4a84b",})
                         )
                         , React.createElement(Sec, { title: "Szerep gyozesi aranyok"  ,}
                           , Object.keys(p.roles).map(role=>{
@@ -672,12 +707,12 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                             games.forEach(g=>{
                               const a=g.assignments.find(x=>x.pid===p.id&&x.role===role);
                               if(!a) return; rs.played++;
-                              if(calcPts(role,g.winTeam,g.pc)>0) rs.won++;
+                              if(isWinner(role,g.winTeam)) rs.won++;
                             });
                             return (
                               React.createElement(Row, { key: role,}
                                 , React.createElement('span', { style: {color:ROLES[role].color,minWidth:98,fontSize:13},}, ROLES[role].icon, " " , ROLES[role].label)
-                                , React.createElement('span', { style: {color:"#3a2810",fontSize:11,minWidth:40},}, rs.won, "/", rs.played)
+                                , React.createElement('span', { style: {color:"#3e2c12",fontSize:11,minWidth:40},}, rs.won, "/", rs.played)
                                 , React.createElement(Bar, { won: rs.won, played: rs.played, color: ROLES[role].color,})
                               )
                             );
@@ -687,7 +722,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                           , Object.entries(p.teamStats).filter(([,v])=>v.p>0).map(([team,v])=>(
                             React.createElement(Row, { key: team,}
                               , React.createElement('span', { style: {color:WIN_TEAMS[team].color,minWidth:118,fontSize:13},}, WIN_TEAMS[team].icon, " " , WIN_TEAMS[team].label)
-                              , React.createElement('span', { style: {color:"#3a2810",fontSize:11,minWidth:40},}, v.w, "/", v.p)
+                              , React.createElement('span', { style: {color:"#3e2c12",fontSize:11,minWidth:40},}, v.w, "/", v.p)
                               , React.createElement(Bar, { won: v.w, played: v.p, color: WIN_TEAMS[team].color,})
                             )
                           ))
@@ -699,10 +734,10 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                               const pct=Math.round(v.w/v.p*100);
                               return (
                                 React.createElement('div', { key: n, style: {flex:1,textAlign:"center",padding:10,
-                                  background:"#0e0a05",borderRadius:6,border:"1px solid #2a1808"},}
+                                  background:"#0d0b07",borderRadius:6,border:"1px solid #251a0c"},}
                                   , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:15,color:"#c89030"},}, n, " fos" )
                                   , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:20,color:pct>=50?"#50c878":"#e05050"},}, pct, "%")
-                                  , React.createElement('div', { style: {fontSize:11,color:"#3a2810"},}, v.w, "G/", v.p, "J")
+                                  , React.createElement('div', { style: {fontSize:11,color:"#3e2c12"},}, v.w, "G/", v.p, "J")
                                 )
                               );
                             })
@@ -714,9 +749,9 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                               , Object.entries(p.teammates).sort(([,a],[,b])=>b-a).slice(0,5).map(([pid,cnt])=>{
                                 const mate=players.find(x=>x.id===pid); if(!mate) return null;
                                 return (
-                                  React.createElement('span', { key: pid, style: {padding:"3px 10px",background:"#0e0a05",
-                                    border:"1px solid #2a1808",borderRadius:20,fontSize:12},}
-                                    , React.createElement('span', { style: {color:"#c8a060"},}, mate.name)
+                                  React.createElement('span', { key: pid, style: {padding:"3px 10px",background:"#0d0b07",
+                                    border:"1px solid #251a0c",borderRadius:20,fontSize:12},}
+                                    , React.createElement('span', { style: {color:"#c8a458"},}, mate.name)
                                     , React.createElement('span', { style: {color:"#50c878",marginLeft:5,fontWeight:700},}, cnt, "×")
                                   )
                                 );
@@ -728,7 +763,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                           const recent=[];
                           for(const g of games){
                             const a=g.assignments.find(x=>x.pid===p.id); if(!a) continue;
-                            recent.push({won:calcPts(a.role,g.winTeam,g.pc)>0,role:a.role,pts:calcPts(a.role,g.winTeam,g.pc)});
+                            recent.push({won:isWinner(a.role,g.winTeam),role:a.role,pts:calcPts(a.role,g.winTeam,g.pc)});
                             if(recent.length>=5) break;
                           }
                           if(!recent.length) return null;
@@ -754,7 +789,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                                 ))
                               )
                               , formaTrend&&last3.length>=2&&(
-                                React.createElement('div', { style: {fontSize:11,color:"#5a3a18",marginTop:4},}, "Utolso "
+                                React.createElement('div', { style: {fontSize:11,color:"#5c3e1a",marginTop:4},}, "Utolso "
                                    , last3.length, " jatek atl.: "   , React.createElement('strong', { style: {color:last3avg>allAvg?"#50c878":"#e05050"},}, last3avg.toFixed(1), " pt" )
                                   , " vs osszes atl.: ", React.createElement('strong', { style: {color:"#c89030"},}, allAvg.toFixed(1), " pt" )
                                 )
@@ -768,16 +803,24 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                 );
               })
             
-            , React.createElement('div', { style: {marginTop:22,padding:13,border:"1px solid #2a1808",borderRadius:6,background:"#0e0a05"},}
-              , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:"#5a3a18",fontSize:11,letterSpacing:2,textAlign:"center",marginBottom:9},}, "PONTOZAS")
+            , React.createElement('div', { style: {marginTop:22,padding:14,border:"1px solid #251a0c",borderRadius:7,background:"#0d0b07"},}
+              , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:"#5c3e1a",fontSize:10,letterSpacing:3,textAlign:"center",marginBottom:12},}, "PONTOZASI RENDSZER")
+              , React.createElement('div', { style: {display:"flex",gap:8,marginBottom:8,padding:"3px 0",borderBottom:"1px solid #1c1408"},}
+                , React.createElement('span', { style: {flex:1,fontSize:10,color:"#3c2410",letterSpacing:1,textTransform:"uppercase"}})
+                , React.createElement('span', { style: {fontSize:10,color:"#4e8a4e",fontWeight:700,letterSpacing:1,textTransform:"uppercase",minWidth:55,textAlign:"right"},}, "GYOZ")
+                , React.createElement('span', { style: {fontSize:10,color:"#5a3a3a",fontWeight:700,letterSpacing:1,textTransform:"uppercase",minWidth:55,textAlign:"right"},}, "VESZT")
+              )
               , Object.entries(ROLES).map(([k,r])=>(
-                React.createElement('div', { key: k, style: {display:"flex",alignItems:"center",gap:8,padding:"4px 0",borderBottom:"1px solid #1a1206",fontSize:12},}
+                React.createElement('div', { key: k, style: {display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:"1px solid #1c1408",fontSize:13},}
                   , React.createElement('span', null, r.icon)
-                  , React.createElement('span', { style: {color:r.color,fontWeight:700,minWidth:82},}, r.label)
-                  , React.createElement('span', { style: {color:"#5a3a18"},}, "5 fos: "  , ROLE_PTS[k][5], " pt" )
-                  , React.createElement('span', { style: {color:"#3a2010",marginLeft:"auto",fontSize:11},}, "6 fos: "  , ROLE_PTS[k][6], " pt" )
+                  , React.createElement('span', { style: {color:r.color,fontWeight:700,flex:1},}, r.label)
+                  , React.createElement('span', { style: {color:"#50c878",fontWeight:700,minWidth:55,textAlign:"right",fontVariantNumeric:"tabular-nums",fontFamily:"'Rye',serif",fontSize:14},}, ROLE_PTS[k].win, " pt")
+                  , React.createElement('span', { style: {color:ROLE_PTS[k].lose>0?"#e08060":"#4a2828",fontWeight:ROLE_PTS[k].lose>0?700:400,minWidth:55,textAlign:"right",fontVariantNumeric:"tabular-nums",fontFamily:"'Rye',serif",fontSize:14},}, ROLE_PTS[k].lose>0?"+"+ROLE_PTS[k].lose+" pt":"—")
                 )
               ))
+              , React.createElement('div', { style: {marginTop:10,padding:"8px 10px",background:"#0a0806",borderRadius:6,border:"1px solid #1c1408",fontSize:11,color:"#4e3418",lineHeight:1.7},}
+                , "Varhato ertek minden szerepnel: ~3.3 pt/jatek"
+              )
             )
           )
         )
@@ -787,14 +830,15 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
           React.createElement('div', { className: "fu",}
             , React.createElement('h2', { style: S.sh,}, "Reszletes statisztikak" )
             , games.length===0?React.createElement(Empty, null, "Meg nincsenek rogzitett jatekok."   ):React.createElement(React.Fragment, null
-              , React.createElement('div', { style: {display:"flex",gap:3,marginBottom:14,background:"#0e0a05",
-                padding:4,borderRadius:6,border:"1px solid #2a1808"},}
+              , React.createElement('div', { style: {display:"flex",gap:4,marginBottom:16,background:"#0d0b07",
+                padding:4,borderRadius:8,border:"1px solid #201608"},}
                 , [{k:"players",l:"Jatekos elemzes"},{k:"global",l:"Globalis"}].map(({k,l})=>(
                   React.createElement('button', { key: k, className: "btn", onClick: ()=>setStab(k),
-                    style: {flex:1,padding:"8px",borderRadius:4,fontSize:13,
-                      background:stab===k?"#2a1a08":"transparent",
-                      color:stab===k?"#e8b84b":"#5a3a18",
-                      border:`1px solid ${stab===k?"#6a4010":"transparent"}`},}, l)
+                    style: {flex:1,padding:"9px",borderRadius:6,fontSize:13,
+                      background:stab===k?"#261a0a":"transparent",
+                      color:stab===k?"#d4a84b":"#6a4a20",
+                      border:`1px solid ${stab===k?"#4a2e10":"transparent"}`,
+                      fontWeight:stab===k?600:400,transition:"background .2s,color .2s,border-color .2s"},}, l)
                 ))
               )
               , stab==="players"&&lb.filter(p=>p.played>0).map((p,i)=>{
@@ -814,25 +858,26 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                   ? (parseFloat(last5avg)>parseFloat(allAvg)?"📈 Javulo":parseFloat(last5avg)<parseFloat(allAvg)?"📉 Romlo":"➡️ Stabil")
                   : null;
                 return (
-                  React.createElement('div', { key: p.id, className: "sr", style: {marginBottom:13,animationDelay:`${i*.06}s`},}
-                    , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8,padding:"11px 13px",
-                      background:"#181008",borderRadius:"6px 6px 0 0",
-                      borderLeft:`3px solid ${["#e8b84b","#b0b0b0","#c07830"][i]||"#3a2010"}`},}
+                  React.createElement('div', { key: p.id, className: "sr", style: {marginBottom:14,animationDelay:`${i*.06}s`},}
+                    , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8,padding:"13px 15px",
+                      background:"#1a1209",borderRadius:"8px 8px 0 0",
+                      border:`1px solid ${i===0?"rgba(212,168,75,0.2)":i===1?"rgba(180,180,180,0.12)":i===2?"rgba(192,120,48,0.15)":"#221608"}`,
+                      borderBottom:"none"},}
                       , React.createElement('span', { style: {fontFamily:"'Rye',serif",fontSize:12,
-                        color:["#e8b84b","#b0b0b0","#c07830"][i]||"#3a2010",minWidth:22},}
+                        color:["#d4a84b","#b0b0b0","#c07830"][i]||"#4e3418",minWidth:22},}
                         , i<3?medals[i]:`#${i+1}`
                       )
-                      , React.createElement('span', { style: {fontSize:16,color:"#d0a860",fontWeight:700,flex:1},}, p.name)
-                      , React.createElement('span', { style: {fontFamily:"'Rye',serif",fontSize:17,color:"#e8b84b"},}, p.pts.toFixed(1), " pt" )
+                      , React.createElement('span', { style: {fontSize:16,color:"#d4a84b",fontWeight:700,flex:1},}, p.name)
+                      , React.createElement('span', { style: {fontFamily:"'Rye',serif",fontSize:17,color:"#d4a84b"},}, p.pts.toFixed(1), " pt" )
                     )
-                    , React.createElement('div', { style: {background:"#100c06",border:"1px solid #2a1808",borderTop:"none",borderRadius:"0 0 6px 6px",padding:11},}
+                    , React.createElement('div', { style: {background:"#141008",border:`1px solid ${i===0?"rgba(212,168,75,0.2)":i===1?"rgba(180,180,180,0.12)":i===2?"rgba(192,120,48,0.15)":"#221608"}`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"16px 14px 12px"},}
                       /* Fo badgek */
-                      , React.createElement('div', { style: {display:"flex",gap:7,flexWrap:"wrap",marginBottom:11},}
-                        , React.createElement(Badge, { label: "Gy. arany" , val: `${wr}%`, sub: `${p.wins}/${p.played}`, color: wr>=50?"#50c878":"#e05050",})
-                        , React.createElement(Badge, { label: "Atl. pt/jatek" , val: avgPts, color: "#e8b84b",})
+                      , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",marginBottom:16},}
+                        , React.createElement(Badge, { label: "Gy. arany" , val: `${wr}%`, sub: `${p.wins}/${p.played}`, color: wr>=50?"#50c878":"#e05050", large:true})
+                        , React.createElement(Badge, { label: "Atl. pt/jatek" , val: avgPts, color: "#d4a84b",})
                         , React.createElement(Badge, { label: "Max gy. sor."  , val: p.maxStreak, color: "#c89030",})
                         , React.createElement(Badge, { label: "Max veszt. sor."  , val: p.maxLoseStreak, color: "#c05050",})
-                        , p.streak>0&&React.createElement(Badge, { label: "Jelenlegi", val: `${p.streak}🔥`, color: "#e8b84b",})
+                        , p.streak>0&&React.createElement(Badge, { label: "Jelenlegi", val: `${p.streak}🔥`, color: "#d4a84b",})
                       )
 
                       /* Pontszam idobeli trendje -- mini sparkline */
@@ -848,15 +893,15 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                           React.createElement(Sec, { title: `Pontszam alakulasa idoben${trend?" -- "+trend:""}`,}
                             , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:12},}
                               , React.createElement('svg', { width: W, height: H, style: {flex:1,maxWidth:W},}
-                                , React.createElement('path', { d: path, fill: "none", stroke: "#e8b84b", strokeWidth: "1.5", strokeLinejoin: "round",})
+                                , React.createElement('path', { d: path, fill: "none", stroke: "#d4a84b", strokeWidth: "1.5", strokeLinejoin: "round",})
                                 , pts2.map((pt,i)=>(
-                                  React.createElement('circle', { key: i, cx: pt.x, cy: pt.y, r: "2.5", fill: "#e8b84b", opacity: "0.7",})
+                                  React.createElement('circle', { key: i, cx: pt.x, cy: pt.y, r: "2.5", fill: "#d4a84b", opacity: "0.7",})
                                 ))
                               )
                               , React.createElement('div', { style: {textAlign:"right",flexShrink:0},}
-                                , React.createElement('div', { style: {fontSize:11,color:"#5a3a18"},}, "Osszes atl." )
+                                , React.createElement('div', { style: {fontSize:11,color:"#5c3e1a"},}, "Osszes atl." )
                                 , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:"#c89030",fontSize:16},}, allAvg, " pt" )
-                                , React.createElement('div', { style: {fontSize:11,color:"#5a3a18",marginTop:4},}, "Utolso 5 atl."  )
+                                , React.createElement('div', { style: {fontSize:11,color:"#5c3e1a",marginTop:4},}, "Utolso 5 atl."  )
                                 , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:parseFloat(last5avg)>=parseFloat(allAvg)?"#50c878":"#e05050",fontSize:16},}, last5avg, " pt" )
                               )
                             )
@@ -881,19 +926,19 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
 
                       /* Szerep gyozesi aranyok */
                       , React.createElement('div', { style: {marginBottom:10},}
-                        , React.createElement('div', { style: {color:"#3a2810",fontSize:10,letterSpacing:2,textTransform:"uppercase",marginBottom:7},}, "Szerep gyozesi aranyok"  )
+                        , React.createElement('div', { style: {color:"#3e2c12",fontSize:10,letterSpacing:2,textTransform:"uppercase",marginBottom:7},}, "Szerep gyozesi aranyok"  )
                         , Object.keys(p.roles).map(role=>{
                           const rs={won:0,played:0};
                           games.forEach(g=>{
                             const a=g.assignments.find(x=>x.pid===p.id&&x.role===role);
                             if(!a) return; rs.played++;
-                            if(calcPts(role,g.winTeam,g.pc)>0) rs.won++;
+                            if(isWinner(role,g.winTeam)) rs.won++;
                           });
                           return (
                             React.createElement('div', { key: role, style: {display:"flex",alignItems:"center",gap:8,marginBottom:5},}
                               , React.createElement('span', { style: {color:ROLES[role].color,width:92,fontSize:12,flexShrink:0},}, ROLES[role].icon, " " , ROLES[role].label)
                               , React.createElement(Bar, { won: rs.won, played: rs.played, color: ROLES[role].color,})
-                              , React.createElement('span', { style: {color:"#3a2810",fontSize:11,minWidth:33,textAlign:"right"},}, rs.won, "/", rs.played)
+                              , React.createElement('span', { style: {color:"#3e2c12",fontSize:11,minWidth:33,textAlign:"right"},}, rs.won, "/", rs.played)
                             )
                           );
                         })
@@ -904,12 +949,12 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                         , Object.entries(p.teamStats).filter(([,v])=>v.p>0).map(([team,v])=>{
                           const pct=Math.round(v.w/v.p*100);
                           return (
-                            React.createElement('div', { key: team, style: {flex:1,minWidth:85,padding:9,background:"#0e0a05",
+                            React.createElement('div', { key: team, style: {flex:1,minWidth:85,padding:9,background:"#0d0b07",
                               borderRadius:6,border:`1px solid ${WIN_TEAMS[team].color}33`,textAlign:"center"},}
                               , React.createElement('div', { style: {fontSize:17},}, WIN_TEAMS[team].icon)
                               , React.createElement('div', { style: {color:WIN_TEAMS[team].color,fontSize:11,fontWeight:700},}, WIN_TEAMS[team].label.split(" ")[0])
                               , React.createElement('div', { style: {fontFamily:"'Rye',serif",fontSize:18,color:pct>=50?"#50c878":"#e05050"},}, pct, "%")
-                              , React.createElement('div', { style: {fontSize:10,color:"#3a2810"},}, v.w, "G/", v.p, "J")
+                              , React.createElement('div', { style: {fontSize:10,color:"#3e2c12"},}, v.w, "G/", v.p, "J")
                             )
                           );
                         })
@@ -944,7 +989,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                 return (
                   React.createElement('div', null
                     , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",marginBottom:13},}
-                      , React.createElement(Badge, { label: "Ossz jatek" , val: games.length, color: "#e8b84b",})
+                      , React.createElement(Badge, { label: "Ossz jatek" , val: games.length, color: "#d4a84b",})
                       , React.createElement(Badge, { label: "5 fos" , val: games.filter(g=>g.pc===5).length, color: "#c89030",})
                       , React.createElement(Badge, { label: "6 fos" , val: games.filter(g=>g.pc===6).length, color: "#c89030",})
                     )
@@ -952,13 +997,13 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       , Object.entries(tw).map(([team,wins])=>(
                         React.createElement(Row, { key: team,}
                           , React.createElement('span', { style: {color:WIN_TEAMS[team].color,minWidth:118,fontSize:13},}, WIN_TEAMS[team].icon, " " , WIN_TEAMS[team].label)
-                          , React.createElement('span', { style: {color:"#3a2810",fontSize:11,minWidth:52},}, wins, " gyoz." )
+                          , React.createElement('span', { style: {color:"#3e2c12",fontSize:11,minWidth:52},}, wins, " gyoz." )
                           , React.createElement(Bar, { won: wins, played: games.length, color: WIN_TEAMS[team].color,})
                         )
                       ))
                     )
                     , React.createElement(Sec, { title: "Szerepek nehezsegi tablazata -- gyozesi % es atlagos pont"        ,}
-                      , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Azonos csapatnal tobb szerep (pl. 2 Helyettes) kulon kerul kimutatasra."
+                      , React.createElement('div', { style: {color:"#5c3e1a",fontSize:11,marginBottom:8},}, "Azonos csapatnal tobb szerep (pl. 2 Helyettes) kulon kerul kimutatasra."
 
                       )
                       , Object.entries(rw).filter(([,v])=>v.p>0).map(([role,v])=>{
@@ -975,7 +1020,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                           React.createElement(Row, { key: role,}
                             , React.createElement('span', { style: {color:ROLES[role].color,minWidth:98,fontSize:13},}, ROLES[role].icon, " " , ROLES[role].label)
                             , React.createElement('span', { style: {color:"#4a6a4a",fontSize:11,minWidth:52},}, "atl. " , avgPt, " pt" )
-                            , React.createElement('span', { style: {color:"#3a2810",fontSize:11,minWidth:40},}, v.w, "/", v.p)
+                            , React.createElement('span', { style: {color:"#3e2c12",fontSize:11,minWidth:40},}, v.w, "/", v.p)
                             , React.createElement(Bar, { won: v.w, played: v.p, color: ROLES[role].color,})
                           )
                         );
@@ -985,9 +1030,9 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       React.createElement(Sec, { title: "Legjobb parosok (kozos gyozelmek)"   ,}
                         , topPairs.map((pair,i)=>(
                           React.createElement('div', { key: i, style: {display:"flex",justifyContent:"space-between",
-                            padding:"6px 10px",marginBottom:3,background:"#0e0a05",
-                            borderRadius:5,border:"1px solid #2a1808"},}
-                            , React.createElement('span', { style: {color:"#c8a060",fontSize:13},}, pair.a, " + "  , pair.b)
+                            padding:"6px 10px",marginBottom:3,background:"#0d0b07",
+                            borderRadius:7,border:"1px solid #251a0c"},}
+                            , React.createElement('span', { style: {color:"#c8a458",fontSize:13},}, pair.a, " + "  , pair.b)
                             , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#50c878"},}, pair.cnt, "×")
                           )
                         ))
@@ -1025,10 +1070,10 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                         React.createElement(Sec, { title: "Legjobb Seriff-Helyettes parosok"  ,}
                           , top.map((t,i)=>(
                             React.createElement(Row, { key: i,}
-                              , React.createElement('span', { style: {color:"#e8b84b",minWidth:10,fontSize:13},}, "🤠⭐")
-                              , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, t.na, " + "  , t.nb)
-                              , React.createElement('span', { style: {color:"#4a3018",fontSize:11,minWidth:40},}, t.w, "/", t.p)
-                              , React.createElement(Bar, { won: t.w, played: t.p, color: "#e8b84b",})
+                              , React.createElement('span', { style: {color:"#d4a84b",minWidth:10,fontSize:13},}, "🤠⭐")
+                              , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, t.na, " + "  , t.nb)
+                              , React.createElement('span', { style: {color:"#4e3418",fontSize:11,minWidth:40},}, t.w, "/", t.p)
+                              , React.createElement(Bar, { won: t.w, played: t.p, color: "#d4a84b",})
                             )
                           ))
                         )
@@ -1059,9 +1104,9 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                             React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,
                               padding:"6px 0",borderBottom:"1px solid #1a1206"},}
                               , React.createElement('span', { style: {fontSize:14},}, _optionalChain([WIN_TEAMS, 'access', _43 => _43[c.team], 'optionalAccess', _44 => _44.icon]))
-                              , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:12},}, c.members.join(" + "))
+                              , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:12},}, c.members.join(" + "))
                               , React.createElement('span', { style: {color:"#50c878",fontSize:12,minWidth:40},}, c.wins, "/", c.count)
-                              , React.createElement(Bar, { won: c.wins, played: c.count, color: _optionalChain([WIN_TEAMS, 'access', _45 => _45[c.team], 'optionalAccess', _46 => _46.color])||"#e8b84b",})
+                              , React.createElement(Bar, { won: c.wins, played: c.count, color: _optionalChain([WIN_TEAMS, 'access', _45 => _45[c.team], 'optionalAccess', _46 => _46.color])||"#d4a84b",})
                             )
                           ))
                         )
@@ -1087,9 +1132,9 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                         React.createElement(Sec, { title: "Bandita gyozesi % -- ki a Seriff? (ki ellen a legkonnyebb nyerni)"           ,}
                           , rows.map(([name,v],i)=>(
                             React.createElement(Row, { key: i,}
-                              , React.createElement('span', { style: {color:"#e8b84b",minWidth:14},}, "🤠")
-                              , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, name, " a Seriff"  )
-                              , React.createElement('span', { style: {color:"#4a3018",fontSize:11,minWidth:40},}, v.bandWin, "/", v.p)
+                              , React.createElement('span', { style: {color:"#d4a84b",minWidth:14},}, "🤠")
+                              , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, name, " a Seriff"  )
+                              , React.createElement('span', { style: {color:"#4e3418",fontSize:11,minWidth:40},}, v.bandWin, "/", v.p)
                               , React.createElement(Bar, { won: v.bandWin, played: v.p, color: "#e05050",})
                             )
                           ))
@@ -1123,22 +1168,22 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                         , React.createElement(Sec, { title: "🍀 Szerencses Seriff -- hany % ban nyeri meg a jatekot ha o a Seriff?"              ,}
                           , [...rows].sort((a,b)=>b.luckyPct-a.luckyPct).map((r,i)=>(
                             React.createElement(Row, { key: i,}
-                              , React.createElement('span', { style: {color:"#e8b84b",minWidth:14},}, "🤠")
-                              , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, r.name)
-                              , React.createElement('span', { style: {color:"#4a3018",fontSize:11,minWidth:42},}, r.seriffWin, "/", r.p)
-                              , React.createElement(Bar, { won: r.seriffWin, played: r.p, color: "#e8b84b",})
+                              , React.createElement('span', { style: {color:"#d4a84b",minWidth:14},}, "🤠")
+                              , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, r.name)
+                              , React.createElement('span', { style: {color:"#4e3418",fontSize:11,minWidth:42},}, r.seriffWin, "/", r.p)
+                              , React.createElement(Bar, { won: r.seriffWin, played: r.p, color: "#d4a84b",})
                             )
                           ))
                         )
                         , React.createElement(Sec, { title: "🪄 Jinx -- ha X a Seriff, az ellenfel hany % ban nyer?"            ,}
-                          , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Minel magasabb, annal nehezebb Seriff -- az ellenfelnek jobban kedvez."
+                          , React.createElement('div', { style: {color:"#5c3e1a",fontSize:11,marginBottom:8},}, "Minel magasabb, annal nehezebb Seriff -- az ellenfelnek jobban kedvez."
 
                           )
                           , [...rows].sort((a,b)=>b.jinxPct-a.jinxPct).map((r,i)=>(
                             React.createElement(Row, { key: i,}
                               , React.createElement('span', { style: {color:"#e05050",minWidth:14},}, "💀")
-                              , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, r.name, " a Seriff"  )
-                              , React.createElement('span', { style: {color:"#4a3018",fontSize:11,minWidth:42},}, r.ellenfelWin, "/", r.p)
+                              , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, r.name, " a Seriff"  )
+                              , React.createElement('span', { style: {color:"#4e3418",fontSize:11,minWidth:42},}, r.ellenfelWin, "/", r.p)
                               , React.createElement(Bar, { won: r.ellenfelWin, played: r.p, color: "#e05050",})
                             )
                           ))
@@ -1176,10 +1221,10 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                             , consistency.map((c,i)=>(
                               React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,
                                 padding:"5px 0",borderBottom:"1px solid #1a1206"},}
-                                , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, c.name)
-                                , React.createElement('span', { style: {color:"#5a4020",fontSize:11},}, c.played, " jatek · atl. "    , c.avg, " pt" )
+                                , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, c.name)
+                                , React.createElement('span', { style: {color:"#4e3a1a",fontSize:11},}, c.played, " jatek · atl. "    , c.avg, " pt" )
                                 , React.createElement('span', { style: {fontFamily:"'Rye',serif",
-                                  color:parseFloat(c.std)<1.5?"#50c878":parseFloat(c.std)<3?"#e8b84b":"#e05050",
+                                  color:parseFloat(c.std)<1.5?"#50c878":parseFloat(c.std)<3?"#d4a84b":"#e05050",
                                   fontSize:15,minWidth:50,textAlign:"right"},}, "±", c.std)
                               )
                             ))
@@ -1192,7 +1237,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                                 padding:"5px 0",borderBottom:"1px solid #1a1206"},}
                                 , React.createElement('span', { style: {color:_optionalChain([ROLES, 'access', _53 => _53[r.role], 'optionalAccess', _54 => _54.color]),minWidth:20,fontSize:14},}, _optionalChain([ROLES, 'access', _55 => _55[r.role], 'optionalAccess', _56 => _56.icon]))
                                 , React.createElement('span', { style: {color:_optionalChain([ROLES, 'access', _57 => _57[r.role], 'optionalAccess', _58 => _58.color]),fontSize:12,minWidth:70},}, _optionalChain([ROLES, 'access', _59 => _59[r.role], 'optionalAccess', _60 => _60.label]))
-                                , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, r.name)
+                                , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, r.name)
                                 , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#c89030",fontSize:16},}, r.cnt, "× egymas utan"  )
                               )
                             ))
@@ -1218,7 +1263,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                         React.createElement(Sec, { title: "Idobeli statisztikak" ,}
                           , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap"},}
                             , avgRounds&&React.createElement(Badge, { label: "Atl. korszam" , val: avgRounds, sub: `${withRounds.length} jatekbol`, color: "#c89030",})
-                            , topDay&&React.createElement(Badge, { label: "Legtobb jatek/nap" , val: topDay[1], sub: topDay[0], color: "#e8b84b",})
+                            , topDay&&React.createElement(Badge, { label: "Legtobb jatek/nap" , val: topDay[1], sub: topDay[0], color: "#d4a84b",})
                             , topMonth&&React.createElement(Badge, { label: "Legaktivabb honap" , val: topMonth[1], sub: topMonth[0], color: "#50c878",})
                           )
                         )
@@ -1235,7 +1280,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                           games.forEach(g=>{
                             const a=g.assignments.find(x=>x.pid===p.id&&x.role===role);
                             if(!a) return; rs.played++;
-                            if(calcPts(role,g.winTeam,g.pc)>0) rs.won++;
+                            if(isWinner(role,g.winTeam)) rs.won++;
                           });
                           if(rs.played>=3) worstRole.push({
                             name:p.name, role, played:rs.played, won:rs.won,
@@ -1253,7 +1298,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                           games.forEach(g=>{
                             const a=g.assignments.find(x=>x.pid===p.id&&x.role===role);
                             if(!a) return; rs.played++;
-                            if(calcPts(role,g.winTeam,g.pc)>0) rs.won++;
+                            if(isWinner(role,g.winTeam)) rs.won++;
                           });
                           return {role, ...rs, pct: rs.played>0?Math.round(rs.won/rs.played*100):0};
                         }).filter(r=>r.played>=2);
@@ -1275,8 +1320,8 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                               React.createElement(Row, { key: i,}
                                 , React.createElement('span', { style: {color:_optionalChain([ROLES, 'access', _61 => _61[r.role], 'optionalAccess', _62 => _62.color]),minWidth:20},}, _optionalChain([ROLES, 'access', _63 => _63[r.role], 'optionalAccess', _64 => _64.icon]))
                                 , React.createElement('span', { style: {color:_optionalChain([ROLES, 'access', _65 => _65[r.role], 'optionalAccess', _66 => _66.color]),fontSize:12,minWidth:75},}, _optionalChain([ROLES, 'access', _67 => _67[r.role], 'optionalAccess', _68 => _68.label]))
-                                , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, r.name)
-                                , React.createElement('span', { style: {color:"#4a3018",fontSize:11,minWidth:40},}, r.won, "/", r.played)
+                                , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, r.name)
+                                , React.createElement('span', { style: {color:"#4e3418",fontSize:11,minWidth:40},}, r.won, "/", r.played)
                                 , React.createElement(Bar, { won: r.won, played: r.played, color: "#e05050",})
                               )
                             ))
@@ -1287,7 +1332,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                             , ponies.map((p,i)=>(
                               React.createElement('div', { key: i, style: {padding:"6px 0",borderBottom:"1px solid #1a1206"},}
                                 , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,marginBottom:3},}
-                                  , React.createElement('span', { style: {color:"#c8a060",fontSize:13,fontWeight:700},}, p.name)
+                                  , React.createElement('span', { style: {color:"#c8a458",fontSize:13,fontWeight:700},}, p.name)
                                 )
                                 , React.createElement('div', { style: {display:"flex",gap:6,flexWrap:"wrap"},}
                                   , React.createElement('span', { style: {fontSize:11,padding:"2px 8px",borderRadius:10,
@@ -1339,7 +1384,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       if(!rivalries.length) return null;
                       return (React.createElement(React.Fragment, null
                         , React.createElement(Sec, { title: "⚔️ Kozvetlen parbaj -- egymas elleni arany"      ,}
-                          , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Csak azok a jatekok ahol a ket jatekos ellentetes csapaton volt."
+                          , React.createElement('div', { style: {color:"#5c3e1a",fontSize:11,marginBottom:8},}, "Csak azok a jatekok ahol a ket jatekos ellentetes csapaton volt."
 
                           )
                           , rivalries.slice(0,6).map((r,i)=>{
@@ -1347,14 +1392,14 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                             return (
                               React.createElement('div', { key: i, style: {padding:"7px 0",borderBottom:"1px solid #1a1206"},}
                                 , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6},}
-                                  , React.createElement('span', { style: {color:aDom||tied?"#e8b84b":"#5a4020",flex:1,fontSize:13,fontWeight:aDom?700:400},}, r.aName)
-                                  , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#e8b84b",fontSize:15},}, r.aW)
-                                  , React.createElement('span', { style: {color:"#3a2810",fontSize:12,padding:"0 6px"},}, "vs")
-                                  , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#e8b84b",fontSize:15},}, r.bW)
-                                  , React.createElement('span', { style: {color:(!aDom&&!tied)?"#e8b84b":"#5a4020",flex:1,fontSize:13,fontWeight:(!aDom&&!tied)?700:400,textAlign:"right"},}, r.bName)
+                                  , React.createElement('span', { style: {color:aDom||tied?"#d4a84b":"#4e3a1a",flex:1,fontSize:13,fontWeight:aDom?700:400},}, r.aName)
+                                  , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#d4a84b",fontSize:15},}, r.aW)
+                                  , React.createElement('span', { style: {color:"#3e2c12",fontSize:12,padding:"0 6px"},}, "vs")
+                                  , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#d4a84b",fontSize:15},}, r.bW)
+                                  , React.createElement('span', { style: {color:(!aDom&&!tied)?"#d4a84b":"#4e3a1a",flex:1,fontSize:13,fontWeight:(!aDom&&!tied)?700:400,textAlign:"right"},}, r.bName)
                                 )
-                                , React.createElement('div', { style: {marginTop:4,height:5,background:"#1a1208",borderRadius:3,overflow:"hidden",display:"flex"},}
-                                  , React.createElement('div', { style: {width:`${r.total>0?r.aW/r.total*100:50}%`,background:"#e8b84b",transition:"width .4s"},})
+                                , React.createElement('div', { style: {marginTop:4,height:5,background:"#1c1408",borderRadius:3,overflow:"hidden",display:"flex"},}
+                                  , React.createElement('div', { style: {width:`${r.total>0?r.aW/r.total*100:50}%`,background:"#d4a84b",transition:"width .4s"},})
                                   , React.createElement('div', { style: {flex:1,background:"#c07030"},})
                                 )
                               )
@@ -1366,11 +1411,11 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                           , rivalries.slice(0,3).map((r,i)=>{
                             const leader = r.aW>r.bW?r.aName:r.bW>r.aW?r.bName:"Dontetlen";
                             return (
-                              React.createElement('div', { key: i, style: {padding:"6px 10px",marginBottom:4,background:"#0e0a05",
-                                borderRadius:6,border:"1px solid #2a1808"},}
+                              React.createElement('div', { key: i, style: {padding:"6px 10px",marginBottom:4,background:"#0d0b07",
+                                borderRadius:6,border:"1px solid #251a0c"},}
                                 , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center"},}
-                                  , React.createElement('span', { style: {color:"#c8a060",fontSize:13},}, r.aName, " vs "  , r.bName)
-                                  , React.createElement('span', { style: {color:"#5a3a18",fontSize:11},}, r.total, " meccs" )
+                                  , React.createElement('span', { style: {color:"#c8a458",fontSize:13},}, r.aName, " vs "  , r.bName)
+                                  , React.createElement('span', { style: {color:"#5c3e1a",fontSize:11},}, r.total, " meccs" )
                                 )
                                 , React.createElement('div', { style: {color:"#50c878",fontSize:12,marginTop:2},}
                                   , r.aW===r.bW?"⚖️ Dontetlen":r.aW>r.bW?`🏅 ${r.aName} vezet ${r.aW}-${r.bW}`:`🏅 ${r.bName} vezet ${r.bW}-${r.aW}`
@@ -1407,14 +1452,14 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                           , top.map((c,i)=>(
                             React.createElement('div', { key: i, style: {padding:"7px 0",borderBottom:"1px solid #1a1206"},}
                               , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,marginBottom:4},}
-                                , React.createElement('span', { style: {color:"#e8b84b",fontSize:12},}, "🤠 " , c.seriff)
-                                , React.createElement('span', { style: {color:"#3a2810",fontSize:11},}, "vs")
+                                , React.createElement('span', { style: {color:"#d4a84b",fontSize:12},}, "🤠 " , c.seriff)
+                                , React.createElement('span', { style: {color:"#3e2c12",fontSize:11},}, "vs")
                                 , React.createElement('span', { style: {color:"#e05050",fontSize:12},}, "💀 " , c.bandita)
-                                , React.createElement('span', { style: {color:"#3a2810",fontSize:11,marginLeft:"auto"},}, c.p, "×")
+                                , React.createElement('span', { style: {color:"#3e2c12",fontSize:11,marginLeft:"auto"},}, c.p, "×")
                               )
                               , React.createElement('div', { style: {display:"flex",gap:6},}
                                 , React.createElement('span', { style: {fontSize:11,padding:"2px 8px",borderRadius:10,
-                                  background:"#1e1608",border:"1px solid #4a3a10",color:"#e8b84b"},}, "🤠 Seriff nyert: "
+                                  background:"#1e1608",border:"1px solid #4a3a10",color:"#d4a84b"},}, "🤠 Seriff nyert: "
                                      , c.seriffWin, "×"
                                 )
                                 , React.createElement('span', { style: {fontSize:11,padding:"2px 8px",borderRadius:10,
@@ -1434,7 +1479,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       const perfStreaks = lb.map(p=>{
                         let best=0, cur=0;
                         [...p.scoreHistory].forEach(h=>{
-                          if(h.pts>0) { cur++; best=Math.max(best,cur); }
+                          if(h.won) { cur++; best=Math.max(best,cur); }
                           else cur=0;
                         });
                         return {name:p.name, best};
@@ -1445,7 +1490,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                         const wonTeams = new Set();
                         games.forEach(g=>{
                           const a=g.assignments.find(x=>x.pid===p.id);
-                          if(a && calcPts(a.role,g.winTeam,g.pc)>0) wonTeams.add(g.winTeam);
+                          if(a && isWinner(a.role,g.winTeam)) wonTeams.add(g.winTeam);
                         });
                         return {name:p.name, wonTeams: [...wonTeams], complete: wonTeams.size===3};
                       });
@@ -1458,9 +1503,9 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                             , perfStreaks.map((p,i)=>(
                               React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,
                                 padding:"5px 0",borderBottom:"1px solid #1a1206"},}
-                                , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, p.name)
-                                , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#e8b84b",fontSize:18},}, p.best, "🔥")
-                                , React.createElement('span', { style: {color:"#5a3a18",fontSize:11},}, "legjobb sorozat" )
+                                , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, p.name)
+                                , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#d4a84b",fontSize:18},}, p.best, "🔥")
+                                , React.createElement('span', { style: {color:"#5c3e1a",fontSize:11},}, "legjobb sorozat" )
                               )
                             ))
                           )
@@ -1483,14 +1528,14 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                               ))
                             )
                           )
-                          , slammers.length===0&&React.createElement('div', { style: {color:"#3a2810",fontSize:12,marginBottom:8},}, "Meg senki sem teljesitette."   )
+                          , slammers.length===0&&React.createElement('div', { style: {color:"#3e2c12",fontSize:12,marginBottom:8},}, "Meg senki sem teljesitette."   )
                           , inProgress.length>0&&(
                             React.createElement('div', null
                               , React.createElement('div', { style: {color:"#7a5a28",fontSize:12,marginBottom:6},}, "⏳ Folyamatban:" )
                               , inProgress.map((p,i)=>(
                                 React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:6,
                                   padding:"4px 0",borderBottom:"1px solid #1a1206"},}
-                                  , React.createElement('span', { style: {color:"#c8a060",fontSize:13},}, p.name)
+                                  , React.createElement('span', { style: {color:"#c8a458",fontSize:13},}, p.name)
                                   , React.createElement('div', { style: {marginLeft:"auto",display:"flex",gap:4},}
                                     , ["seriff","bandita","renegat"].map(t=>(
                                       React.createElement('span', { key: t, style: {fontSize:16,opacity:p.wonTeams.includes(t)?1:0.2},}
@@ -1519,11 +1564,11 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                           const next = myGames[i+1];
                           const prevA = prev.assignments.find(a=>a.pid===p.id);
                           if(!prevA) continue;
-                          const prevWon = calcPts(prevA.role,prev.winTeam,prev.pc)>0;
+                          const prevWon = isWinner(prevA.role,prev.winTeam);
                           if(!prevWon){
                             chances++;
                             const nextA = next.assignments.find(a=>a.pid===p.id);
-                            if(nextA && calcPts(nextA.role,next.winTeam,next.pc)>0) wins++;
+                            if(nextA && isWinner(nextA.role,next.winTeam)) wins++;
                           }
                         }
                         if(chances<2) return null;
@@ -1533,13 +1578,13 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       if(!comebacks.length) return null;
                       return (
                         React.createElement(Sec, { title: "🥊 Visszavago arany -- vereseg utan a kovetkezo jatekban nyer-e?"         ,}
-                          , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Csak olyan jatekok ahol az elozo jatekot elveszitette."
+                          , React.createElement('div', { style: {color:"#5c3e1a",fontSize:11,marginBottom:8},}, "Csak olyan jatekok ahol az elozo jatekot elveszitette."
 
                           )
                           , comebacks.map((c,i)=>(
                             React.createElement(Row, { key: i,}
-                              , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, c.name)
-                              , React.createElement('span', { style: {color:"#4a3018",fontSize:11,minWidth:42},}, c.wins, "/", c.chances)
+                              , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, c.name)
+                              , React.createElement('span', { style: {color:"#4e3418",fontSize:11,minWidth:42},}, c.wins, "/", c.chances)
                               , React.createElement(Bar, { won: c.wins, played: c.chances, color: c.pct>=50?"#50c878":"#e05050",})
                             )
                           ))
@@ -1581,13 +1626,13 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       if(!tilters.length) return null;
                       return (
                         React.createElement(Sec, { title: "⚖️ Ki billenti fel az egyensulyt?"     ,}
-                          , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "Ha ez a jatekos jatszik, az adott csapat szignifikansan tobbet nyer a globalis atlaghoz kepest."
+                          , React.createElement('div', { style: {color:"#5c3e1a",fontSize:11,marginBottom:8},}, "Ha ez a jatekos jatszik, az adott csapat szignifikansan tobbet nyer a globalis atlaghoz kepest."
 
                           )
                           , tilters.slice(0,5).map((t,i)=>(
                             React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,
                               padding:"6px 0",borderBottom:"1px solid #1a1206"},}
-                              , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, t.name)
+                              , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, t.name)
                               , React.createElement('span', { style: {color:WIN_TEAMS[t.team].color,fontSize:12},}
                                 , WIN_TEAMS[t.team].icon, " " , WIN_TEAMS[t.team].label
                               )
@@ -1626,11 +1671,11 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       const best = days[0];
                       return (
                         React.createElement(Sec, { title: "🎯 Legkiegyensulyozottabb nap -- legtobb kulonbozo gyoztes csapat"       ,}
-                          , React.createElement('div', { style: {padding:"10px 12px",background:"#0e0a05",borderRadius:6,
-                            border:"1px solid #2a1808"},}
+                          , React.createElement('div', { style: {padding:"10px 12px",background:"#0d0b07",borderRadius:6,
+                            border:"1px solid #251a0c"},}
                             , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",marginBottom:8},}
-                              , React.createElement('span', { style: {color:"#e8b84b",fontFamily:"'Rye',serif",fontSize:16},}, best.date)
-                              , React.createElement('span', { style: {color:"#5a3a18",fontSize:12},}, best.games, " jatek" )
+                              , React.createElement('span', { style: {color:"#d4a84b",fontFamily:"'Rye',serif",fontSize:16},}, best.date)
+                              , React.createElement('span', { style: {color:"#5c3e1a",fontSize:12},}, best.games, " jatek" )
                             )
                             , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap"},}
                               , Object.entries(best.teams).map(([team,cnt])=>(
@@ -1644,7 +1689,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                             )
                           )
                           , days.length>1&&(
-                            React.createElement('div', { style: {marginTop:8,color:"#3a2810",fontSize:11},}, "Tobbi kiegyensulyozott nap: "
+                            React.createElement('div', { style: {marginTop:8,color:"#3e2c12",fontSize:11},}, "Tobbi kiegyensulyozott nap: "
                                  , days.slice(1,3).map(d=>d.date).join(", ")
                             )
                           )
@@ -1674,14 +1719,14 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                               , i===0&&React.createElement('span', { style: {fontSize:18},}, "🥇")
                               , i===1&&React.createElement('span', { style: {fontSize:18},}, "🥈")
                               , i===2&&React.createElement('span', { style: {fontSize:18},}, "🥉")
-                              , i>2&&React.createElement('span', { style: {width:22,textAlign:"center",color:"#3a2010",
+                              , i>2&&React.createElement('span', { style: {width:22,textAlign:"center",color:"#3c2410",
                                 fontSize:12,fontFamily:"'Rye',serif"},}, "#", i+1)
-                              , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13},}, name)
+                              , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13},}, name)
                               , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6},}
                                 , Array.from({length:cnt}).map((_,j)=>(
                                   React.createElement('span', { key: j, style: {fontSize:14},}, "⭐")
                                 ))
-                                , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#e8b84b",
+                                , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:"#d4a84b",
                                   fontSize:18,marginLeft:4},}, cnt, "×")
                               )
                             )
@@ -1712,15 +1757,15 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       if(!symData.length) return null;
                       return (
                         React.createElement(Sec, { title: "🎲 Szimmetria mutato -- mennyire egyenloen osztjak a szerepeket?"        ,}
-                          , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:8},}, "100% = minden szerepet egyforma aranyban kapott. Minel magasabb, annal sokoldalubb."
+                          , React.createElement('div', { style: {color:"#5c3e1a",fontSize:11,marginBottom:8},}, "100% = minden szerepet egyforma aranyban kapott. Minel magasabb, annal sokoldalubb."
 
                           )
                           , symData.map((p,i)=>(
-                            React.createElement('div', { key: i, style: {marginBottom:8,padding:"8px 10px",background:"#0e0a05",borderRadius:6,border:"1px solid #2a1808"},}
+                            React.createElement('div', { key: i, style: {marginBottom:8,padding:"8px 10px",background:"#0d0b07",borderRadius:6,border:"1px solid #251a0c"},}
                               , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8,marginBottom:6},}
-                                , React.createElement('span', { style: {color:"#c8a060",flex:1,fontSize:13,fontWeight:700},}, p.name)
+                                , React.createElement('span', { style: {color:"#c8a458",flex:1,fontSize:13,fontWeight:700},}, p.name)
                                 , React.createElement('span', { style: {fontFamily:"'Rye',serif",
-                                  color:p.symScore>=70?"#50c878":p.symScore>=40?"#e8b84b":"#e05050",
+                                  color:p.symScore>=70?"#50c878":p.symScore>=40?"#d4a84b":"#e05050",
                                   fontSize:18},}, p.symScore, "%")
                               )
                               , React.createElement('div', { style: {display:"flex",gap:4,flexWrap:"wrap"},}
@@ -1771,16 +1816,16 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                       if(comps.length===0) return null;
                       return (
                         React.createElement(Sec, { title: `🎰 Meccs-osszetetelek -- ${uniqueCount} egyedi kombinacio ${games.length} meccsbol`,}
-                          , React.createElement('div', { style: {color:"#5a3a18",fontSize:11,marginBottom:10},}, "Legtobbszor elofordulo osszetetelek:"
+                          , React.createElement('div', { style: {color:"#5c3e1a",fontSize:11,marginBottom:10},}, "Legtobbszor elofordulo osszetetelek:"
 
                           )
                           , comps.slice(0,4).map((c,i)=>{
                             const topWinner = Object.entries(c.wins).sort(([,a],[,b])=>b-a)[0];
                             return (
-                              React.createElement('div', { key: i, style: {marginBottom:8,padding:"8px 10px",background:"#0e0a05",
-                                borderRadius:6,border:"1px solid #2a1808"},}
+                              React.createElement('div', { key: i, style: {marginBottom:8,padding:"8px 10px",background:"#0d0b07",
+                                borderRadius:6,border:"1px solid #251a0c"},}
                                 , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",marginBottom:6},}
-                                  , React.createElement('span', { style: {color:"#5a3a18",fontSize:11},}, c.count, "× lejatszva" )
+                                  , React.createElement('span', { style: {color:"#5c3e1a",fontSize:11},}, c.count, "× lejatszva" )
                                   , React.createElement('span', { style: {color:_optionalChain([WIN_TEAMS, 'access', _101 => _101[topWinner[0]], 'optionalAccess', _102 => _102.color]),fontSize:11},}
                                     , _optionalChain([WIN_TEAMS, 'access', _103 => _103[topWinner[0]], 'optionalAccess', _104 => _104.icon]), " " , topWinner[1], "× nyerte"
                                   )
@@ -1799,7 +1844,7 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                             );
                           })
                           , uniqueCount>4&&(
-                            React.createElement('div', { style: {color:"#3a2810",fontSize:11,marginTop:4,textAlign:"center"},}, "+ "
+                            React.createElement('div', { style: {color:"#3e2c12",fontSize:11,marginTop:4,textAlign:"center"},}, "+ "
                                , uniqueCount-4, " tovabbi egyedi osszetetel"
                             )
                           )
@@ -1821,16 +1866,16 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
             , players.length<5
               ? React.createElement(Empty, null, "Legalabb 5 jatekos szukseges."   )
               : React.createElement(React.Fragment, null
-                , React.createElement('div', { style: {display:"flex",gap:14,flexWrap:"wrap",marginBottom:17},}
+                , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:20},}
                   , React.createElement('div', null
                     , React.createElement('div', { style: S.label,}, "Hanyan jatszottak?" )
-                    , React.createElement('div', { style: {display:"flex",gap:8,marginTop:6},}
+                    , React.createElement('div', { style: {display:"flex",gap:8,marginTop:7},}
                       , [5,6].filter(n=>players.length>=n).map(n=>(
                         React.createElement('button', { key: n, className: "btn", onClick: ()=>{setPc(n);setAssign({});},
-                          style: {padding:"7px 20px",background:pc===n?"#2a1a08":"#1a1008",
-                            color:pc===n?"#e8b84b":"#6a4a20",
-                            border:`1px solid ${pc===n?"#7a5020":"#3a2010"}`,borderRadius:4,fontSize:15},}
-                          , n, " fos"
+                          style: {flex:1,padding:"9px 12px",background:pc===n?"#2a1a08":"#181006",
+                            color:pc===n?"#d4a84b":"#6a4a20",
+                            border:`1px solid ${pc===n?"#7a5020":"#3c2410"}`,borderRadius:6,fontSize:15,fontWeight:pc===n?700:400},}
+                          , n, " fős"
                         )
                       ))
                     )
@@ -1838,32 +1883,36 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                   , React.createElement('div', null
                     , React.createElement('div', { style: S.label,}, "Datum")
                     , React.createElement('input', { type: "date", value: date, onChange: e=>setDate(e.target.value),
-                      style: {background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
-                        borderRadius:4,padding:"7px 11px",fontSize:14,marginTop:6},})
+                      style: {width:"100%",background:"#181006",color:"#c8a458",border:"1px solid #2e1e0c",
+                        borderRadius:6,padding:"9px 11px",fontSize:14,marginTop:7},})
                   )
                   , React.createElement('div', null
                     , React.createElement('div', { style: S.label,}, "Korok szama (opcionalis)"  )
-                    , React.createElement('input', { type: "number", min: "1", max: "99", placeholder: "pl. 12" ,
+                    , React.createElement('input', { type: "number", min: "1", max: "99", placeholder: "—" ,
                       value: rounds, onChange: e=>setRounds(e.target.value),
-                      style: {background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
-                        borderRadius:4,padding:"7px 11px",fontSize:14,marginTop:6,width:90},})
+                      style: {width:"100%",background:"#181006",color:"#c8a458",border:"1px solid #2e1e0c",
+                        borderRadius:6,padding:"9px 11px",fontSize:14,marginTop:7},})
                   )
                 )
                 , React.createElement('div', { style: S.label,}, "Szerepek kiosztasa" )
-                , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(182px,1fr))",gap:9,marginTop:7},}
+                , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:10,marginTop:8,marginBottom:4},}
                   , slots.map((role,i)=>{
-                    const r=ROLES[role]; const pts=_optionalChain([ROLE_PTS, 'access', _113 => _113[role], 'optionalAccess', _114 => _114[pc]])||r.base;
+                    const r=ROLES[role];
+                    const winPts=ROLE_PTS[role].win;
+                    const losePts=ROLE_PTS[role].lose;
                     return (
                       React.createElement('div', { key: i, style: {padding:"11px 12px",borderRadius:6,
                         border:`1px solid ${r.color}44`,background:r.dark},}
                         , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",color:r.color,
                           fontSize:14,fontWeight:700,marginBottom:7},}
                           , React.createElement('span', null, r.icon, " " , r.label)
-                          , React.createElement('span', { style: {opacity:.7,fontSize:12},}, "+", pts, " pt" )
+                          , React.createElement('span', { style: {opacity:.75,fontSize:11,fontVariantNumeric:"tabular-nums"},}
+                            , "Gy:", winPts, " / V:", losePts>0?"+"+losePts:"—"
+                          )
                         )
                         , React.createElement('select', { value: assign[i]||"", onChange: e=>setAssign(p=>({...p,[i]:e.target.value})),
-                          style: {width:"100%",background:"#100c06",color:"#c8a060",
-                            border:`1px solid ${assign[i]?r.color+"55":"#2a1808"}`,
+                          style: {width:"100%",background:"#141008",color:"#c8a458",
+                            border:`1px solid ${assign[i]?r.color+"55":"#251a0c"}`,
                             borderRadius:4,padding:"6px 9px",fontSize:14},}
                           , React.createElement('option', { value: "",}, "-- valassz --"  )
                           , players.map(p=>{
@@ -1880,41 +1929,45 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                   , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap",marginTop:7},}
                     , Object.entries(WIN_TEAMS).map(([k,wt])=>(
                       React.createElement('button', { key: k, className: "btn", onClick: ()=>setWinner(k),
-                        style: {padding:"8px 15px",background:winner===k?wt.color+"22":"#1a1008",
+                        style: {padding:"8px 15px",background:winner===k?wt.color+"22":"#181006",
                           color:winner===k?wt.color:"#6a4a20",
                           border:`1px solid ${winner===k?wt.color:wt.color+"44"}`,
-                          borderRadius:4,fontSize:14,transition:"all .15s"},}
+                          borderRadius:4,fontSize:14,transition:"background .2s,color .2s,border-color .2s,transform .15s"},}
                         , wt.icon, " " , wt.label
                       )
                     ))
                   )
                 )
                 , allOk&&(
-                  React.createElement('div', { className: "fu", style: {marginTop:15,padding:13,border:"1px solid #3a2808",
-                    borderRadius:6,background:"#0e0a05"},}
-                    , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:"#6a4a18",fontSize:11,
-                      letterSpacing:2,textAlign:"center",marginBottom:9},}, "✦ PONTOK ELONEZETE ✦"   )
+                  React.createElement('div', { className: "fu", style: {marginTop:15,padding:14,border:"1px solid #3a2808",
+                    borderRadius:6,background:"#0d0b07"},}
+                    , React.createElement('div', { style: {fontFamily:"'Rye',serif",color:"#5a3e18",fontSize:10,
+                      letterSpacing:3,textAlign:"center",marginBottom:10},}, "✦ PONTOK ELŐNÉZETE ✦"   )
                     , slots.map((role,i)=>{
                       const player=players.find(x=>x.id===assign[i]);
                       const pts=calcPts(role,winner,pc);
+                      const won=ROLES[role].team===winner;
+                      const isConsolation=!won&&pts>0;
                       return (
-                        React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,padding:"5px 0",
-                          borderBottom:"1px solid #1e1206",fontSize:13},}
+                        React.createElement('div', { key: i, style: {display:"flex",alignItems:"center",gap:8,padding:"6px 0",
+                          borderBottom:"1px solid #1c1408",fontSize:13},}
                           , React.createElement('span', { style: {color:ROLES[role].color,minWidth:93},}, ROLES[role].icon, " " , ROLES[role].label)
-                          , React.createElement('span', { style: {color:"#c8a060",flex:1},}, _optionalChain([player, 'optionalAccess', _115 => _115.name]))
-                          , React.createElement('span', { style: {fontFamily:"'Rye',serif",fontSize:16,
-                            color:pts>0?"#50c878":"#5a3030"},}, pts>0?`+${pts}`:"-")
+                          , React.createElement('span', { style: {color:"#c8a458",flex:1},}, _optionalChain([player, 'optionalAccess', _115 => _115.name]))
+                          , React.createElement('span', { style: {fontFamily:"'Rye',serif",fontSize:16,fontVariantNumeric:"tabular-nums",
+                            color:won?"#50c878":isConsolation?"#c89050":"#4a2828"},}
+                            , won?`+${pts}`:isConsolation?`+${pts}`:"—"
+                          )
                         )
                       );
                     })
                   )
                 )
                 , React.createElement('button', { className: "btn", onClick: doGameSave, disabled: !allOk,
-                  style: {marginTop:18,width:"100%",padding:"12px",
+                  style: {marginTop:20,width:"100%",padding:"14px",
                     background:"linear-gradient(180deg,#3a2208,#231504)",
-                    color:"#e8b84b",border:"1px solid #6a4010",borderRadius:5,
+                    color:"#d4a84b",border:"1px solid #5a3810",borderRadius:8,
                     fontFamily:"'Rye',serif",fontSize:16,letterSpacing:2,
-                    boxShadow:"0 4px 18px #00000055",opacity:allOk?1:.4},}, "💾  Jatek Mentese"
+                    boxShadow:"0 4px 24px rgba(0,0,0,0.6)"},}, "💾  Jatek Mentese"
 
                 )
               )
@@ -1926,29 +1979,30 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
         , view==="pl"&&(
           React.createElement('div', { className: "fu",}
             , React.createElement('h2', { style: S.sh,}, "Jatekosok")
-            , React.createElement('div', { style: {display:"flex",gap:9,marginBottom:15},}
+            , React.createElement('div', { style: {display:"flex",gap:8,marginBottom:16},}
               , React.createElement('input', { value: newName, onChange: e=>setNewName(e.target.value),
                 onKeyDown: e=>e.key==="Enter"&&addPlayer(),
                 placeholder: "Jatekos neve..." ,
-                style: {flex:1,background:"#1a1008",color:"#c8a060",border:"1px solid #3a2010",
-                  borderRadius:4,padding:"8px 12px",fontSize:15},})
+                style: {flex:1,background:"#181006",color:"#c8a458",border:"1px solid #2e1e0c",
+                  borderRadius:6,padding:"10px 14px",fontSize:15},})
               , React.createElement('button', { className: "btn", onClick: addPlayer,
-                style: {background:"#2a1a08",color:"#e8b84b",border:"1px solid #5a3a10",
-                  borderRadius:4,padding:"8px 15px",fontSize:14},}, "+ Hozzaad" )
+                style: {background:"#1e1408",color:"#d4a84b",border:"1px solid #4a3010",
+                  borderRadius:6,padding:"10px 18px",fontSize:14,fontWeight:600},}, "+ Hozzáad" )
             )
             , players.length===0?React.createElement(Empty, null, "Meg nincsenek jatekosok."  )
               :players.map((p,i)=>{
                 const st=lb.find(x=>x.id===p.id);
                 return (
                   React.createElement('div', { key: p.id, className: "hov sr" ,
-                    style: {display:"flex",alignItems:"center",gap:10,padding:"10px 13px",
-                      borderRadius:6,background:"#100c06",marginBottom:4,
-                      borderLeft:"3px solid #2a1808",animationDelay:`${i*.04}s`},}
-                    , React.createElement('span', { style: {fontSize:16,color:"#d0a860",flex:1},}, p.name)
-                    , st&&st.played>0&&React.createElement('span', { style: {fontSize:12,color:"#4a3018"},}, st.pts.toFixed(1), " pt · "   , st.played, " J" )
-                    , React.createElement('button', { className: "btn", onClick: ()=>delPlayer(p.id),
-                      style: {background:"#2a0a0a",color:"#c05050",border:"1px solid #5a1a1a",
-                        borderRadius:4,padding:"3px 9px",fontSize:12},}, "✕")
+                    style: {display:"flex",alignItems:"center",gap:12,padding:"12px 16px",
+                      borderRadius:7,background:"#141008",marginBottom:6,
+                      border:"1px solid #251a0c",
+                      animationDelay:`${i*.04}s`},}
+                    , React.createElement('span', { style: {fontSize:16,color:"#d4a84b",flex:1},}, p.name)
+                    , st&&st.played>0&&React.createElement('span', { style: {fontSize:12,color:"#4e3418"},}, st.pts.toFixed(1), " pt · "   , st.played, " J" )
+                    , React.createElement('button', { className: "btn btn-del", onClick: ()=>delPlayer(p.id),
+                      style: {background:"transparent",color:"#7a3030",border:"1px solid #3a1a1a",
+                        borderRadius:6,padding:"5px 10px",fontSize:13,minWidth:32,minHeight:32},}, "✕")
                   )
                 );
               })
@@ -1965,29 +2019,42 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
                 const wt=WIN_TEAMS[g.winTeam];
                 return (
                   React.createElement('div', { key: g.id, className: "sr",
-                    style: {padding:"12px 13px",borderRadius:6,background:"#100c06",marginBottom:6,
-                      borderLeft:`3px solid ${wt.color}55`,animationDelay:`${gi*.05}s`},}
+                    style: {borderRadius:8,background:"#141008",marginBottom:10,
+                      border:`1px solid #251a0c`,
+                      borderTop:`2px solid ${wt.color}55`,overflow:"hidden",
+                      animationDelay:`${gi*.05}s`},}
                     , React.createElement('div', { style: {display:"flex",alignItems:"center",justifyContent:"space-between",
-                      flexWrap:"wrap",gap:6,marginBottom:8},}
-                      , React.createElement('span', { style: {color:"#5a3a18",fontSize:12},}, g.date, " · "  , g.pc, " fos" )
-                      , React.createElement('span', { style: {color:wt.color,fontWeight:700,fontSize:13},}, wt.icon, " " , wt.label, " nyert" )
-                      , React.createElement('button', { className: "btn", onClick: ()=>delGame(g.id),
-                        style: {background:"#2a0a0a",color:"#c05050",border:"1px solid #5a1a1a",
-                          borderRadius:4,padding:"2px 7px",fontSize:11},}, "✕ torol" )
+                      flexWrap:"wrap",gap:6,padding:"11px 15px 10px",
+                      borderBottom:"1px solid #1c1408",background:"#0f0d08"},}
+                      , React.createElement('div', null
+                        , React.createElement('span', { style: {color:wt.color,fontWeight:700,fontSize:14},}, wt.icon, " " , wt.label, " nyert" )
+                        , React.createElement('span', { style: {color:"#3e2c12",fontSize:11,marginLeft:10},}, g.date, "  ·  ", g.pc, " fős")
+                      )
+                      , React.createElement('button', { className: "btn btn-del", onClick: ()=>delGame(g.id),
+                        style: {background:"transparent",color:"#7a3030",border:"1px solid #3a1a1a",
+                          borderRadius:6,padding:"4px 10px",fontSize:12,minHeight:28},}, "✕ töröl" )
                     )
-                    , g.assignments.map((a,ai)=>{
-                      const player=players.find(x=>x.id===a.pid);
-                      const r=ROLES[a.role]; const pts=calcPts(a.role,g.winTeam,g.pc);
-                      return (
-                        React.createElement('div', { key: ai, style: {display:"flex",alignItems:"center",gap:8,fontSize:13,
-                          padding:"4px 0",borderBottom:"1px solid #1a1206"},}
-                          , React.createElement('span', { style: {color:r.color,minWidth:88},}, r.icon, " " , r.label)
-                          , React.createElement('span', { style: {color:"#c0a060",flex:1},}, _optionalChain([player, 'optionalAccess', _116 => _116.name])||"?")
-                          , React.createElement('span', { style: {fontFamily:"'Rye',serif",color:pts>0?"#50c878":"#5a3030",
-                            fontSize:13},}, pts>0?`+${pts}`:"-")
-                        )
-                      );
-                    })
+                    , React.createElement('div', { style: {padding:"8px 15px 4px"},}
+                      , g.assignments.map((a,ai)=>{
+                        const player=players.find(x=>x.id===a.pid);
+                        const r=ROLES[a.role]; const pts=calcPts(a.role,g.winTeam,g.pc);
+                        const won=r.team===g.winTeam;
+                        const isConsolation=!won&&pts>0;
+                        const isLast=ai===g.assignments.length-1;
+                        return (
+                          React.createElement('div', { key: ai, style: {display:"flex",alignItems:"center",gap:8,fontSize:13,
+                            padding:"5px 0",borderBottom:isLast?"none":"1px solid #181208"},}
+                            , React.createElement('span', { style: {color:r.color,minWidth:90},}, r.icon, " " , r.label)
+                            , React.createElement('span', { style: {color:"#c8a458",flex:1},}, _optionalChain([player, 'optionalAccess', _116 => _116.name])||"?")
+                            , React.createElement('span', { style: {fontFamily:"'Rye',serif",
+                              color:won?"#50c878":isConsolation?"#c89050":"#4a2828",
+                              fontSize:13,fontVariantNumeric:"tabular-nums"},}
+                              , won?`+${pts}`:isConsolation?`+${pts}`:"—"
+                            )
+                          )
+                        );
+                      })
+                    )
                   )
                 );
               })
@@ -2001,37 +2068,56 @@ function App({apiKey, roomId, roomName, initPlayers, initGames, onLeaveRoom}) {
 }
 
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0c0905} ::-webkit-scrollbar-thumb{background:#4a2e10;border-radius:2px}
+  html{scroll-behavior:smooth}
+  :root{
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px;
+    --sp-6:24px; --sp-8:32px; --sp-10:40px; --sp-12:48px;
+    --radius-sm:6px; --radius-md:8px; --radius-lg:10px;
+    --border:1px solid #251a0c; --border-dim:1px solid #1c1408;
+    --gold:#d4a84b; --green:#50c878; --red:#e05050;
+    --text:#c8a458; --text-dim:#5c3e1a; --text-faint:#3e2c12;
+  }
+  ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-track{background:#0a0806} ::-webkit-scrollbar-thumb{background:#3a2208;border-radius:3px} ::-webkit-scrollbar-thumb:hover{background:#5a3210}
   input,select,button,textarea{font-family:'Playfair Display',Georgia,serif}
-  select option{background:#1a1008;color:#c8a060}
-  .btn{transition:all .15s;cursor:pointer;border:none}
-  .btn:hover:not(:disabled){filter:brightness(1.2);transform:translateY(-1px)}
-  .btn:active:not(:disabled){transform:translateY(0)}
-  .btn:disabled{opacity:.35;cursor:not-allowed}
-  .hov:hover{background:rgba(232,184,75,.06)!important}
-  @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes sr{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
-  @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-  .fu{animation:fu .25s ease both}
-  .sr{animation:sr .22s ease both}
+  select option{background:#181008;color:#c0982a}
+  .btn{transition:background .2s,color .2s,border-color .2s,transform .15s,opacity .2s;cursor:pointer;border:none}
+  .btn:hover:not(:disabled){transform:translateY(-1px)}
+  .btn:active:not(:disabled){transform:translateY(1px) scale(0.98)}
+  .btn:disabled{opacity:.3;cursor:not-allowed}
+  .btn:focus-visible{outline:2px solid #d4a84b;outline-offset:2px}
+  .hov{transition:background .18s}
+  .hov:hover{background:rgba(212,168,75,.07)!important}
+  @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes sr{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  .fu{animation:fu .3s cubic-bezier(0.22,1,0.36,1) both}
+  .sr{animation:sr .28s cubic-bezier(0.22,1,0.36,1) both}
   .nb{position:relative}
-  .nb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#e8b84b;transform:scaleX(0);transition:transform .2s}
+  .nb::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:#d4a84b;transform:scaleX(0);transform-origin:center;transition:transform .25s cubic-bezier(0.22,1,0.36,1)}
   .nb.on::after{transform:scaleX(1)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#6a4818!important;box-shadow:0 0 0 3px rgba(212,168,75,.08)!important}
+  @media (prefers-reduced-motion: reduce){
+    .fu,.sr{animation:none!important}
+    .btn{transition:none!important}
+    *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  }
+  .btn-del:hover:not(:disabled){color:#e05050!important;border-color:#6a2020!important}
+  .sec-divider{height:1px;background:linear-gradient(90deg,transparent,#2a1a0c 20%,#2a1a0c 80%,transparent);margin:20px 0}
 `;
 
 const S = {
-  root:   { minHeight:"100vh", background:"radial-gradient(ellipse at 50% 0%,#1a0e04 0%,#0c0905 55%,#080906 100%)", fontFamily:"'Playfair Display',Georgia,serif", color:"#c8a060" },
-  hdr:    { textAlign:"center", padding:"22px 14px 14px", borderBottom:"1px solid #2a1808", background:"linear-gradient(180deg,#1e1006 0%,transparent 100%)" },
-  deco:   { color:"#3a2410", fontSize:11, letterSpacing:7, marginBottom:3 },
-  title:  { fontFamily:"'Rye',serif", fontSize:"clamp(50px,13vw,90px)", color:"#e8b84b", letterSpacing:8, lineHeight:1, textShadow:"0 0 50px #e8b84b2a,0 2px 0 #000", margin:"5px 0 3px" },
-  sub:    { color:"#5a3a18", fontSize:"clamp(9px,2.2vw,12px)", letterSpacing:"clamp(4px,1.5vw,7px)" },
-  nav:    { display:"flex", flexWrap:"wrap", justifyContent:"center", gap:1, padding:"0 5px", background:"#0e0a05", borderBottom:"1px solid #2a1808" },
-  navBtn: { background:"transparent", fontSize:"clamp(11px,2.4vw,13px)", padding:"10px clamp(6px,2vw,14px)", letterSpacing:.5, cursor:"pointer", transition:"color .15s", fontFamily:"'Playfair Display',serif" },
-  main:   { maxWidth:700, margin:"0 auto", padding:"22px 13px 54px" },
-  sh:     { fontFamily:"'Rye',serif", color:"#c89030", fontSize:18, letterSpacing:2, marginBottom:17, paddingBottom:9, borderBottom:"1px solid #2a1808" },
-  label:  { color:"#6a4a20", fontSize:11, letterSpacing:2, textTransform:"uppercase" },
+  root:   { minHeight:"100vh", background:"radial-gradient(ellipse 100% 70% at 50% 0%,#1c1208 0%,#0d0b07 45%,#0a0806 100%)", fontFamily:"'Playfair Display',Georgia,serif", color:"#c8a458", position:"relative" },
+  hdr:    { textAlign:"center", padding:"32px 16px 18px", borderBottom:"1px solid #251a0c", background:"linear-gradient(180deg,#1a1108 0%,rgba(13,11,7,0) 100%)" },
+  deco:   { color:"#3d2812", fontSize:11, letterSpacing:8, marginBottom:8, opacity:.7 },
+  title:  { fontFamily:"'Rye',serif", fontSize:"clamp(52px,13vw,96px)", color:"#d4a84b", letterSpacing:8, lineHeight:1, textShadow:"0 0 80px rgba(212,168,75,0.2),0 0 30px rgba(212,168,75,0.1),0 2px 0 #000", margin:"6px 0 5px" },
+  sub:    { color:"#5a3a1a", fontSize:"clamp(9px,2.2vw,11px)", letterSpacing:"clamp(5px,2vw,9px)", fontWeight:600 },
+  nav:    { display:"flex", flexWrap:"wrap", justifyContent:"center", gap:2, padding:"6px 8px", background:"rgba(10,8,6,0.85)", borderBottom:"1px solid #1e1408", backdropFilter:"blur(8px)", position:"sticky", top:0, zIndex:100 },
+  navBtn: { background:"transparent", fontSize:"clamp(11px,2.4vw,13px)", padding:"8px clamp(8px,2vw,16px)", letterSpacing:.5, cursor:"pointer", transition:"color .2s, background .2s", fontFamily:"'Playfair Display',serif", borderRadius:20, color:"#7a5625" },
+  main:   { maxWidth:700, margin:"0 auto", padding:"28px 16px 72px", position:"relative", zIndex:1 },
+  sh:     { fontFamily:"'Rye',serif", color:"#c8982a", fontSize:18, letterSpacing:2, marginBottom:24, paddingBottom:12, borderBottom:"1px solid #251a0c" },
+  label:  { color:"#6a4820", fontSize:10, letterSpacing:2.5, textTransform:"uppercase", fontWeight:600 },
 };
 
 
